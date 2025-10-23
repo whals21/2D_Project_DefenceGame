@@ -43,10 +43,3 @@ public class GridCell
     public bool isEmpty = true;
     public Block block = null;
 }
-
-public class Block
-{
-    public string blockName;
-    public Color blockColor;
-    // 블록의 기능, 타입 등 추가 가능
-}
