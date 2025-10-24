@@ -154,6 +154,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &397144457
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 397144459}
+  - component: {fileID: 397144458}
+  m_Layer: 0
+  m_Name: EnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &397144458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397144457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627e4d42d66ed6c40a64c8b6234c8817, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 4653533247574520983, guid: 262980fa6bf054746a01c602952e5090, type: 3}
+  poolSize: 10
+  spawnInterval: 2
+  pathFinder: {fileID: 1749608241}
+--- !u!4 &397144459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397144457}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.374722, y: 3.2664444, z: -0.063100636}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,6 +340,8 @@ MonoBehaviour:
   invalidPlacementColor: {r: 1, g: 0, b: 0, a: 0.5}
   purchasableCellColor: {r: 1, g: 1, b: 0, a: 0.2}
   pathTileColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
+  pathFinder: {fileID: 1749608241}
+  enemySpawner: {fileID: 397144458}
 --- !u!4 &1223712199
 Transform:
   m_ObjectHideFlags: 0
@@ -356,6 +406,50 @@ MonoBehaviour:
   swordSprite: {fileID: 21300000, guid: 38205c75bf8dabe48a2dc5e4acf148d5, type: 3}
   shieldSprite: {fileID: 21300000, guid: 3b42b9bd68c27a44fa69b607023e4eb1, type: 3}
   bowSprite: {fileID: 21300000, guid: eb8f1d274dd5cc241915422876fe3af0, type: 3}
+--- !u!1 &1749608240
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1749608242}
+  - component: {fileID: 1749608241}
+  m_Layer: 0
+  m_Name: PathFinder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1749608241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749608240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6ae484d1984aaa479175fd121daae50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1749608242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749608240}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.374722, y: 3.2664444, z: -0.063100636}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1761525754
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,3 +507,5 @@ SceneRoots:
   - {fileID: 1223712199}
   - {fileID: 1629259397}
   - {fileID: 1761525756}
+  - {fileID: 1749608242}
+  - {fileID: 397144459}

@@ -108,9 +108,12 @@ public class DraggableSprite : MonoBehaviour
         }
         else
         {
-            // 배치 불가능한 경우 - 자유롭게 배치
-            Debug.Log($"Item {itemData.itemName} placed outside grid at {transform.position}");
+            // 배치 불가능한 경우 - 그리드 밖으로 튕김
+            Vector3 ejectPosition = grid.GetEjectPosition();
+            transform.position = ejectPosition;
             itemData.gridPosition = new Vector2Int(-1, -1); // 그리드에 없음을 표시
+
+            Debug.Log($"❌ Cannot place {itemData.itemName}! Ejected to {ejectPosition}");
         }
     }
     

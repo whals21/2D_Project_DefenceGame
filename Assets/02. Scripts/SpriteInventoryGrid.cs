@@ -27,6 +27,10 @@ public class SpriteInventoryGrid : MonoBehaviour
     public Color purchasableCellColor = new Color(1f, 1f, 0f, 0.2f);     // 구매 가능한 셀 (노란색 반투명)
     public Color pathTileColor = new Color(0.1f, 0.1f, 0.1f, 1f);        // 몬스터 경로 타일 (검은색)
 
+    [Header("Enemy System")]
+    public PathFinder pathFinder;
+    public EnemySpawner enemySpawner;
+
     private bool[,] gridState;
     private List<GridItem> placedItems = new List<GridItem>();
     private Dictionary<GridItem, GameObject> itemObjects = new Dictionary<GridItem, GameObject>();
@@ -555,6 +559,9 @@ public class SpriteInventoryGrid : MonoBehaviour
         Vector2Int size = item.GetRotatedSize();
         Color highlightColor = canPlace ? validPlacementColor : invalidPlacementColor;
 
+        int arrayWidth = cellObjects.GetLength(0);
+        int arrayHeight = cellObjects.GetLength(1);
+
         // 각 셀 하이라이트
         for (int x = 0; x < size.x; x++)
         {
@@ -563,9 +570,10 @@ public class SpriteInventoryGrid : MonoBehaviour
                 int cellX = position.x + x;
                 int cellY = position.y + y;
 
-                // 그리드 범위 체크
-                if (cellX >= 0 && cellX < gridWidth && cellY >= 0 && cellY < gridHeight)
+                // 배열 범위 체크
+                if (cellX >= 0 && cellX < arrayWidth && cellY >= 0 && cellY < arrayHeight)
                 {
+                    // 실제 셀이 존재하는지 확인
                     if (cellObjects[cellX, cellY] != null)
                     {
                         SpriteRenderer sr = cellObjects[cellX, cellY].GetComponent<SpriteRenderer>();
@@ -760,6 +768,14 @@ public class SpriteInventoryGrid : MonoBehaviour
             // 구매 모드 활성화 - 구매 가능한 셀 표시, 경로 타일 숨김
             UpdatePurchasableCells();
             HidePathTiles();
+
+            // 적 생성 중지
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.ClearAllEnemies();
+            }
+
             Debug.Log("🛒 Purchase mode ENABLED");
         }
         else
@@ -767,6 +783,28 @@ public class SpriteInventoryGrid : MonoBehaviour
             // 구매 모드 비활성화 - 구매 가능한 셀 숨김, 경로 타일 표시
             HidePurchasableCells();
             CreatePathTiles();
+
+            // 경로 재계산
+            if (pathFinder != null)
+            {
+                pathFinder.CalculatePath();
+                Debug.Log("🗺️ Path recalculated!");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ PathFinder not assigned!");
+            }
+
+            // 적 생성 시작
+            if (enemySpawner != null)
+            {
+                enemySpawner.StartSpawning();
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ EnemySpawner not assigned!");
+            }
+
             Debug.Log("🛒 Purchase mode DISABLED - Monster path created");
         }
     }
@@ -929,5 +967,38 @@ public class SpriteInventoryGrid : MonoBehaviour
     public string GetGridInfo()
     {
         return $"Current: {gridWidth}x{gridHeight} / Max: {maxGridWidth}x{maxGridHeight}";
+    }
+
+    /// <summary>
+    /// 아이템을 튕길 위치 계산 (그리드 밖 적당한 위치)
+    /// </summary>
+    public Vector3 GetEjectPosition()
+    {
+        // 그리드의 실제 범위 계산
+        int minX = int.MaxValue, maxX = int.MinValue;
+        int minY = int.MaxValue, maxY = int.MinValue;
+
+        int arrayWidth = cellObjects.GetLength(0);
+        int arrayHeight = cellObjects.GetLength(1);
+
+        for (int x = 0; x < arrayWidth; x++)
+        {
+            for (int y = 0; y < arrayHeight; y++)
+            {
+                if (cellObjects[x, y] != null)
+                {
+                    minX = Mathf.Min(minX, x);
+                    maxX = Mathf.Max(maxX, x);
+                    minY = Mathf.Min(minY, y);
+                    maxY = Mathf.Max(maxY, y);
+                }
+            }
+        }
+
+        // 그리드 오른쪽 밖으로 2-3칸 떨어진 위치
+        int ejectX = maxX + 3;
+        int ejectY = (minY + maxY) / 2; // 세로 중앙
+
+        return GridToWorldPosition(ejectX, ejectY);
     }
 }
