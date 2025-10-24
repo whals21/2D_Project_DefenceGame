@@ -56,19 +56,25 @@ public class DraggableSprite : MonoBehaviour
         
         // 정렬 순서 변경 (맨 위로)
         spriteRenderer.sortingOrder = 10;
-        
-        // 그리드에서 임시 제거
-        grid.RemoveItem(itemData);
-        
+
+        // 그리드에서 임시 제거 (비주얼은 유지)
+        grid.RemoveItem(itemData, destroyVisual: false);
+
         Debug.Log($"✅ Started dragging {itemData.itemName}");
     }
     
     void OnMouseDrag()
     {
         if (!isDragging || itemData == null) return;
-        
+
         Vector3 mousePos = GetMouseWorldPosition();
         transform.position = mousePos + offset;
+
+        // 배치 프리뷰 표시 (백팩 히어로 스타일)
+        if (grid != null)
+        {
+            grid.ShowPlacementPreview(itemData, mousePos);
+        }
     }
     
     void OnMouseUp()
@@ -76,45 +82,62 @@ public class DraggableSprite : MonoBehaviour
         if (!isDragging || itemData == null || grid == null)
         {
             isDragging = false;
+            if (grid != null) grid.HidePlacementPreview();
             return;
         }
-        
+
         isDragging = false;
-        
+
+        // 프리뷰 숨기기
+        grid.HidePlacementPreview();
+
         // 원래 색상 복구
         spriteRenderer.color = originalColor;
         spriteRenderer.sortingOrder = 1;
-        
+
         // 현재 위치를 그리드 좌표로 변환
-        Vector2Int newGridPos = grid.WorldToGridPosition(transform.position);
-        
-        // 그리드에 배치 시도
+        Vector3 mousePos = GetMouseWorldPosition();
+        Vector2Int newGridPos = grid.WorldToGridPosition(mousePos);
+
+        // 해당 위치에 배치 가능한지 확인 (셀 존재 여부 포함)
         if (grid.CanPlaceItem(itemData, newGridPos))
         {
+            // 그리드에 배치
             grid.PlaceItem(itemData, newGridPos);
             Debug.Log($"Placed {itemData.itemName} at {newGridPos}");
         }
         else
         {
-            // 배치 불가능하면 원래 위치로 복구
-            Debug.Log($"Cannot place {itemData.itemName} at {newGridPos}, restoring");
-            transform.position = originalPosition;
-            
-            if (originalGridPos.x >= 0 && originalGridPos.y >= 0)
-            {
-                grid.PlaceItem(itemData, originalGridPos);
-            }
+            // 배치 불가능한 경우 - 자유롭게 배치
+            Debug.Log($"Item {itemData.itemName} placed outside grid at {transform.position}");
+            itemData.gridPosition = new Vector2Int(-1, -1); // 그리드에 없음을 표시
         }
     }
     
-    // 우클릭으로 회전 (선택사항)
     void Update()
     {
-        if (Input.GetMouseButtonDown(1)) // 우클릭
+        // 드래그 중 회전 (R키 또는 마우스 휠)
+        if (isDragging)
+        {
+            // R키로 회전
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                RotateDuringDrag();
+            }
+
+            // 마우스 휠로 회전
+            float scrollDelta = Input.mouseScrollDelta.y;
+            if (scrollDelta > 0)
+            {
+                RotateDuringDrag();
+            }
+        }
+        // 우클릭으로 회전 (배치된 아이템)
+        else if (Input.GetMouseButtonDown(1))
         {
             Vector3 mousePos = GetMouseWorldPosition();
             Collider2D hit = Physics2D.OverlapPoint(mousePos);
-            
+
             if (hit != null && hit.gameObject == gameObject)
             {
                 if (grid != null && itemData != null)
@@ -124,6 +147,28 @@ public class DraggableSprite : MonoBehaviour
                 }
             }
         }
+    }
+
+    void RotateDuringDrag()
+    {
+        if (itemData == null || grid == null) return;
+
+        itemData.Rotate();
+
+        // 회전 시각적 업데이트 - 크기는 원본 크기로, 회전만 변경
+        transform.localScale = new Vector3(
+            itemData.width * grid.cellSize * 0.95f,
+            itemData.height * grid.cellSize * 0.95f,
+            1f
+        );
+        // Z축 기준으로 90도씩 회전
+        transform.rotation = Quaternion.Euler(0, 0, itemData.rotation);
+
+        // 프리뷰 업데이트
+        Vector3 mousePos = GetMouseWorldPosition();
+        grid.ShowPlacementPreview(itemData, mousePos);
+
+        Debug.Log($"Rotated {itemData.itemName} during drag (rotation: {itemData.rotation})");
     }
     
     Vector3 GetMouseWorldPosition()

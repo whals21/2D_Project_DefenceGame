@@ -26,7 +26,7 @@ public class GridItem
             return new Vector2Int(height, width);
         return new Vector2Int(width, height);
     }
-    
+
     public void Rotate()
     {
         rotation = (rotation + 90) % 360;

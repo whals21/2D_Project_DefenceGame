@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/조민희/Documents/2D_Project_DefenceGame/Assets/02. Scripts/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
