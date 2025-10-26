@@ -98,6 +98,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  moveSpeed: 2
+  moveSpeed: 8
   normalColor: {r: 1, g: 0, b: 0, a: 1}
   damageColor: {r: 1, g: 1, b: 1, a: 1}

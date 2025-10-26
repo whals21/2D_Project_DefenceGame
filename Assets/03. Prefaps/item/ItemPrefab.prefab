@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3938713626997129276}
   - component: {fileID: 1592495253831394464}
   - component: {fileID: 699066266418729594}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TextMeshPro
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,7 +182,7 @@ GameObject:
   - component: {fileID: 1214124818942704500}
   - component: {fileID: 2476899621373427528}
   - component: {fileID: 5170604197206123912}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -356,7 +356,7 @@ GameObject:
   - component: {fileID: 3259814882023663749}
   - component: {fileID: 1116483158950434834}
   - component: {fileID: 5306715388819803264}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ItemPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -88,14 +88,51 @@ public class Enemy : MonoBehaviour
         Vector3 targetPosition = path[currentWaypointIndex];
         Vector3 currentPosition = transform.position;
 
-        // 목표 지점으로 이동
-        transform.position = Vector3.MoveTowards(currentPosition, targetPosition, moveSpeed * Time.deltaTime);
+        // 목표 지점으로 이동 전에 Cell 충돌 체크
+        Vector3 newPosition = Vector3.MoveTowards(currentPosition, targetPosition, moveSpeed * Time.deltaTime);
+
+        // Cell을 통과하지 않는지 검증
+        if (!IsPathBlockedByCell(currentPosition, newPosition))
+        {
+            transform.position = newPosition;
+        }
+        else
+        {
+            // Cell에 막혔으면 다음 웨이포인트로 건너뜀
+            Debug.LogWarning($"⚠️ {gameObject.name} blocked by Cell! Skipping waypoint {currentWaypointIndex}");
+            currentWaypointIndex++;
+        }
 
         // 웨이포인트 도달 확인
         if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
         {
             currentWaypointIndex++;
         }
+    }
+
+    /// <summary>
+    /// 두 지점 사이 경로에 Cell이 있는지 검사
+    /// </summary>
+    private bool IsPathBlockedByCell(Vector3 from, Vector3 to)
+    {
+        Vector3 direction = to - from;
+        float distance = direction.magnitude;
+
+        if (distance < 0.01f) return false;
+
+        // Raycast로 경로상에 Cell이 있는지 체크
+        RaycastHit2D[] hits = Physics2D.RaycastAll(from, direction.normalized, distance);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            // Cell 태그를 가진 오브젝트가 있으면 차단됨
+            if (hit.collider != null && hit.collider.CompareTag("Cell"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -90,6 +90,7 @@ public class SpriteInventoryGrid : MonoBehaviour
                 Vector3 cellPos = GridToWorldPosition(x, y);
                 GameObject cell = Instantiate(cellPrefab, cellPos, Quaternion.identity, transform);
                 cell.name = $"Cell_{x}_{y}";
+                cell.tag = "Cell"; // Cell 태그 추가
 
                 SpriteRenderer sr = cell.GetComponent<SpriteRenderer>();
                 if (sr != null)
@@ -872,13 +873,17 @@ public class SpriteInventoryGrid : MonoBehaviour
         int pathMinY = Mathf.Max(0, centerY - pathMaxHeight / 2);
         int pathMaxY = Mathf.Min(arrayHeight - 1, centerY + pathMaxHeight / 2);
 
+        // Flood Fill로 외부에서 접근 가능한 빈 공간 찾기
+        bool[,] reachableFromOutside = new bool[arrayWidth, arrayHeight];
+        FloodFillReachableSpaces(pathMinX, pathMaxX, pathMinY, pathMaxY, reachableFromOutside);
+
         // 경로 타일 생성 범위 내에서 셀이 없는 곳에 경로 생성
         for (int x = pathMinX; x <= pathMaxX; x++)
         {
             for (int y = pathMinY; y <= pathMaxY; y++)
             {
-                // 셀이 없는 곳에만 경로 타일 생성
-                if (cellObjects[x, y] == null)
+                // 셀이 없고, 외부에서 접근 가능한 곳에만 경로 타일 생성
+                if (cellObjects[x, y] == null && reachableFromOutside[x, y])
                 {
                     // 상하좌우 중 하나라도 셀이 있으면 경로 생성
                     bool hasAdjacentCell = false;
@@ -932,6 +937,8 @@ public class SpriteInventoryGrid : MonoBehaviour
         Vector3 tilePos = GridToWorldPosition(x, y);
         GameObject pathTile = Instantiate(cellPrefab, tilePos, Quaternion.identity, transform);
         pathTile.name = $"PathTile_{x}_{y}";
+        //PathTile에 "PathTile" 태그 추가
+        pathTile.tag = "PathTile";
 
         SpriteRenderer sr = pathTile.GetComponent<SpriteRenderer>();
         if (sr != null)
@@ -947,6 +954,94 @@ public class SpriteInventoryGrid : MonoBehaviour
         if (collider != null) Destroy(collider);
 
         pathTiles.Add(pathTile);
+    }
+
+    /// <summary>
+    /// Flood Fill 알고리즘으로 외부에서 접근 가능한 빈 공간 찾기
+    /// 셀로 완전히 둘러싸인 내부 공간은 제외
+    /// </summary>
+    void FloodFillReachableSpaces(int minX, int maxX, int minY, int maxY, bool[,] reachable)
+    {
+        int arrayWidth = cellObjects.GetLength(0);
+        int arrayHeight = cellObjects.GetLength(1);
+
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+
+        // 경로 범위의 테두리에서 시작 (외부 경계)
+        // 위쪽 테두리
+        for (int x = minX; x <= maxX; x++)
+        {
+            if (cellObjects[x, maxY] == null && !reachable[x, maxY])
+            {
+                queue.Enqueue(new Vector2Int(x, maxY));
+                reachable[x, maxY] = true;
+            }
+        }
+
+        // 아래쪽 테두리
+        for (int x = minX; x <= maxX; x++)
+        {
+            if (cellObjects[x, minY] == null && !reachable[x, minY])
+            {
+                queue.Enqueue(new Vector2Int(x, minY));
+                reachable[x, minY] = true;
+            }
+        }
+
+        // 왼쪽 테두리
+        for (int y = minY; y <= maxY; y++)
+        {
+            if (cellObjects[minX, y] == null && !reachable[minX, y])
+            {
+                queue.Enqueue(new Vector2Int(minX, y));
+                reachable[minX, y] = true;
+            }
+        }
+
+        // 오른쪽 테두리
+        for (int y = minY; y <= maxY; y++)
+        {
+            if (cellObjects[maxX, y] == null && !reachable[maxX, y])
+            {
+                queue.Enqueue(new Vector2Int(maxX, y));
+                reachable[maxX, y] = true;
+            }
+        }
+
+        // Flood Fill 수행 (상하좌우로 확산)
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            int x = current.x;
+            int y = current.y;
+
+            // 상하좌우 4방향 체크
+            Vector2Int[] directions = new Vector2Int[]
+            {
+                new Vector2Int(0, 1),   // 위
+                new Vector2Int(0, -1),  // 아래
+                new Vector2Int(1, 0),   // 오른쪽
+                new Vector2Int(-1, 0)   // 왼쪽
+            };
+
+            foreach (Vector2Int dir in directions)
+            {
+                int nx = x + dir.x;
+                int ny = y + dir.y;
+
+                // 범위 체크
+                if (nx >= minX && nx <= maxX && ny >= minY && ny <= maxY &&
+                    nx >= 0 && nx < arrayWidth && ny >= 0 && ny < arrayHeight)
+                {
+                    // 셀이 없고, 아직 방문하지 않은 곳만 추가
+                    if (cellObjects[nx, ny] == null && !reachable[nx, ny])
+                    {
+                        reachable[nx, ny] = true;
+                        queue.Enqueue(new Vector2Int(nx, ny));
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>

@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2782447491078965645}
   - component: {fileID: 9061118265226776822}
-  - component: {fileID: -6920406502117289186}
-  m_Layer: 0
+  - component: {fileID: -39895749819991631}
+  m_Layer: 6
   m_Name: CellPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &-6920406502117289186
+--- !u!61 &-39895749819991631
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,5 +128,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.0001, y: 0.0001}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0

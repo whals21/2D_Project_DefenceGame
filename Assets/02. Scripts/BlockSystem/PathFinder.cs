@@ -65,6 +65,7 @@ public class PathFinder : MonoBehaviour
 
     /// <summary>
     /// 경로 타일을 시계방향으로 정렬 (그리드 외곽을 따라)
+    /// 상하좌우로만 이동 (대각선 이동 금지)
     /// </summary>
     private List<GameObject> SortPathTilesClockwise(List<GameObject> tiles, GameObject startTile)
     {
@@ -83,7 +84,7 @@ public class PathFinder : MonoBehaviour
         {
             iterations++;
 
-            // 현재 타일에서 가장 가까운 미방문 타일 찾기
+            // 현재 타일에서 상하좌우 방향으로만 인접한 미방문 타일 찾기
             GameObject nextTile = null;
             float minDistance = float.MaxValue;
 
@@ -91,25 +92,52 @@ public class PathFinder : MonoBehaviour
             {
                 if (visited.Contains(tile)) continue;
 
-                float distance = Vector3.Distance(currentTile.transform.position, tile.transform.position);
+                Vector3 currentPos = currentTile.transform.position;
+                Vector3 tilePos = tile.transform.position;
 
-                // 인접한 타일만 선택 (대각선 포함, 최대 거리 1.5)
-                if (distance < 1.5f && distance < minDistance)
+                float distance = Vector3.Distance(currentPos, tilePos);
+
+                // 상하좌우로만 인접한 타일 선택 (대각선 제외)
+                // X축 또는 Y축 중 하나만 차이가 있어야 함 (둘 다 차이나면 대각선)
+                float deltaX = Mathf.Abs(currentPos.x - tilePos.x);
+                float deltaY = Mathf.Abs(currentPos.y - tilePos.y);
+
+                // 상하좌우 조건: 한 축은 같고(0.1 이하), 다른 축은 1.1 이하의 차이
+                bool isOrthogonal = (deltaX < 0.1f && deltaY > 0.1f && deltaY < 1.1f) ||
+                                   (deltaY < 0.1f && deltaX > 0.1f && deltaX < 1.1f);
+
+                // Cell을 통과하지 않는지 검증
+                bool pathIsClear = !IsPathBlockedByCell(currentPos, tilePos);
+
+                if (isOrthogonal && pathIsClear && distance < minDistance)
                 {
                     minDistance = distance;
                     nextTile = tile;
                 }
             }
 
-            // 인접 타일이 없으면 가장 가까운 미방문 타일 선택
+            // 인접 타일이 없으면 상하좌우로 가장 가까운 미방문 타일 선택
             if (nextTile == null)
             {
                 foreach (GameObject tile in tiles)
                 {
                     if (visited.Contains(tile)) continue;
 
-                    float distance = Vector3.Distance(currentTile.transform.position, tile.transform.position);
-                    if (distance < minDistance)
+                    Vector3 currentPos = currentTile.transform.position;
+                    Vector3 tilePos = tile.transform.position;
+
+                    float distance = Vector3.Distance(currentPos, tilePos);
+
+                    float deltaX = Mathf.Abs(currentPos.x - tilePos.x);
+                    float deltaY = Mathf.Abs(currentPos.y - tilePos.y);
+
+                    // 여전히 상하좌우 우선이지만 거리 제한 완화
+                    bool isOrthogonal = (deltaX < 0.1f || deltaY < 0.1f);
+
+                    // Cell을 통과하지 않는지 검증
+                    bool pathIsClear = !IsPathBlockedByCell(currentPos, tilePos);
+
+                    if (isOrthogonal && pathIsClear && distance < minDistance)
                     {
                         minDistance = distance;
                         nextTile = tile;
@@ -130,6 +158,33 @@ public class PathFinder : MonoBehaviour
         }
 
         return sortedPath;
+    }
+
+    /// <summary>
+    /// 두 지점 사이 경로에 Cell이 있는지 검사
+    /// </summary>
+    private bool IsPathBlockedByCell(Vector3 from, Vector3 to)
+    {
+        // Raycast로 경로상에 Cell이 있는지 체크
+        Vector3 direction = to - from;
+        float distance = direction.magnitude;
+
+        // 거리가 너무 짧으면 체크 안 함
+        if (distance < 0.1f) return false;
+
+        // Raycast 수행 (Cell 레이어 체크)
+        RaycastHit2D[] hits = Physics2D.RaycastAll(from, direction.normalized, distance);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            // Cell 태그를 가진 오브젝트가 있으면 차단됨
+            if (hit.collider != null && hit.collider.CompareTag("Cell"))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
