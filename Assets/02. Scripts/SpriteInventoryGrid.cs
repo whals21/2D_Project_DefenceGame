@@ -495,6 +495,18 @@ public class SpriteInventoryGrid : MonoBehaviour
         // Z축 기준으로 회전 (90도씩)
         itemObj.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
 
+        // Shape 블록인 경우 ShapeBlockHandler 추가
+        if (item.HasShape())
+        {
+            ShapeBlockHandler shapeHandler = itemObj.GetComponent<ShapeBlockHandler>();
+            if (shapeHandler == null)
+            {
+                shapeHandler = itemObj.AddComponent<ShapeBlockHandler>();
+            }
+            shapeHandler.blockData = item;
+            shapeHandler.grid = this;
+        }
+
         // DraggableSprite 컴포넌트 초기화
         DraggableSprite draggable = itemObj.GetComponent<DraggableSprite>();
         if (draggable != null)
@@ -564,6 +576,18 @@ public class SpriteInventoryGrid : MonoBehaviour
         // Z축 기준으로 회전 (90도씩)
         itemObj.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
 
+        // Shape 블록인 경우 ShapeBlockHandler 추가
+        if (item.HasShape())
+        {
+            ShapeBlockHandler shapeHandler = itemObj.GetComponent<ShapeBlockHandler>();
+            if (shapeHandler == null)
+            {
+                shapeHandler = itemObj.AddComponent<ShapeBlockHandler>();
+            }
+            shapeHandler.blockData = item;
+            shapeHandler.grid = this;
+        }
+
         // DraggableSprite 컴포넌트 초기화
         DraggableSprite draggable = itemObj.GetComponent<DraggableSprite>();
         if (draggable != null)
@@ -576,7 +600,7 @@ public class SpriteInventoryGrid : MonoBehaviour
         {
             Debug.LogError($"❌ DraggableSprite component not found on {itemObj.name}!");
         }
-        
+
         itemObjects[item] = itemObj;
     }
     
