@@ -138,10 +138,43 @@ public class SpriteInventoryGrid : MonoBehaviour
     // 아이템을 배치할 수 있는지 확인
     public bool CanPlaceItem(GridItem item, Vector2Int position, bool showWarning = false)
     {
-        Vector2Int size = item.GetRotatedSize();
-
         int arrayWidth = gridState.GetLength(0);
         int arrayHeight = gridState.GetLength(1);
+
+        // Shape 기반 충돌 체크 (테트리스/펜토미노 블록)
+        if (item.HasShape())
+        {
+            foreach (Vector2Int shapeCell in item.shape)
+            {
+                int cellX = position.x + shapeCell.x;
+                int cellY = position.y + shapeCell.y;
+
+                // 배열 범위 체크
+                if (cellX < 0 || cellY < 0 || cellX >= arrayWidth || cellY >= arrayHeight)
+                {
+                    if (showWarning) Debug.LogWarning($"Out of bounds: {cellX}, {cellY}");
+                    return false;
+                }
+
+                // 셀이 존재하는지 체크 (그리드 범위 내인지)
+                if (cellObjects[cellX, cellY] == null)
+                {
+                    if (showWarning) Debug.LogWarning($"Cell doesn't exist: {cellX}, {cellY}");
+                    return false;
+                }
+
+                // 이미 점유된 셀인지 체크
+                if (gridState[cellX, cellY])
+                {
+                    if (showWarning) Debug.LogWarning($"Cell occupied: {cellX}, {cellY}");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // 기존 방식 (사각형 블록)
+        Vector2Int size = item.GetRotatedSize();
 
         // 배열 범위 체크
         if (position.x < 0 || position.y < 0 ||
@@ -190,14 +223,29 @@ public class SpriteInventoryGrid : MonoBehaviour
             Debug.LogWarning($"❌ Cannot place {item.itemName} at {position}");
             return false;
         }
-        
-        Vector2Int size = item.GetRotatedSize();
-        for (int x = 0; x < size.x; x++)
+
+        // Shape 기반 배치 (테트리스/펜토미노 블록)
+        if (item.HasShape())
         {
-            for (int y = 0; y < size.y; y++)
+            foreach (Vector2Int shapeCell in item.shape)
             {
-                gridState[position.x + x, position.y + y] = true;
-                UpdateCellVisual(position.x + x, position.y + y);
+                int cellX = position.x + shapeCell.x;
+                int cellY = position.y + shapeCell.y;
+                gridState[cellX, cellY] = true;
+                UpdateCellVisual(cellX, cellY);
+            }
+        }
+        else
+        {
+            // 기존 방식 (사각형 블록)
+            Vector2Int size = item.GetRotatedSize();
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    gridState[position.x + x, position.y + y] = true;
+                    UpdateCellVisual(position.x + x, position.y + y);
+                }
             }
         }
         
@@ -225,16 +273,32 @@ public class SpriteInventoryGrid : MonoBehaviour
         {
             return false;
         }
-        
-        Vector2Int size = item.GetRotatedSize();
+
         Vector2Int pos = item.gridPosition;
-        
-        for (int x = 0; x < size.x; x++)
+
+        // Shape 기반 제거 (테트리스/펜토미노 블록)
+        if (item.HasShape())
         {
-            for (int y = 0; y < size.y; y++)
+            foreach (Vector2Int shapeCell in item.shape)
             {
-                gridState[pos.x + x, pos.y + y] = false;
-                UpdateCellVisual(pos.x + x, pos.y + y);
+                int cellX = pos.x + shapeCell.x;
+                int cellY = pos.y + shapeCell.y;
+                gridState[cellX, cellY] = false;
+                UpdateCellVisual(cellX, cellY);
+            }
+        }
+        else
+        {
+            // 기존 방식 (사각형 블록)
+            Vector2Int size = item.GetRotatedSize();
+
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    gridState[pos.x + x, pos.y + y] = false;
+                    UpdateCellVisual(pos.x + x, pos.y + y);
+                }
             }
         }
         
@@ -282,32 +346,62 @@ public class SpriteInventoryGrid : MonoBehaviour
         }
 
         Vector2Int originalPos = item.gridPosition;
-        Vector2Int originalSize = item.GetRotatedSize();
 
         // 원래 위치 해제
-        for (int x = 0; x < originalSize.x; x++)
+        if (item.HasShape())
         {
-            for (int y = 0; y < originalSize.y; y++)
+            // Shape 기반 해제
+            foreach (Vector2Int shapeCell in item.shape)
             {
-                gridState[originalPos.x + x, originalPos.y + y] = false;
-                UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                int cellX = originalPos.x + shapeCell.x;
+                int cellY = originalPos.y + shapeCell.y;
+                gridState[cellX, cellY] = false;
+                UpdateCellVisual(cellX, cellY);
+            }
+        }
+        else
+        {
+            // 기존 방식
+            Vector2Int originalSize = item.GetRotatedSize();
+            for (int x = 0; x < originalSize.x; x++)
+            {
+                for (int y = 0; y < originalSize.y; y++)
+                {
+                    gridState[originalPos.x + x, originalPos.y + y] = false;
+                    UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                }
             }
         }
 
         // 회전
         item.Rotate();
-        Vector2Int newSize = item.GetRotatedSize();
 
         // 회전 후 배치 가능한지 확인
         if (CanPlaceItem(item, originalPos))
         {
             // 새 위치에 배치
-            for (int x = 0; x < newSize.x; x++)
+            if (item.HasShape())
             {
-                for (int y = 0; y < newSize.y; y++)
+                // Shape 기반 배치
+                foreach (Vector2Int shapeCell in item.shape)
                 {
-                    gridState[originalPos.x + x, originalPos.y + y] = true;
-                    UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                    int cellX = originalPos.x + shapeCell.x;
+                    int cellY = originalPos.y + shapeCell.y;
+                    gridState[cellX, cellY] = true;
+                    UpdateCellVisual(cellX, cellY);
+                }
+            }
+            else
+            {
+                // 기존 방식
+                Vector2Int newSize = item.GetRotatedSize();
+                for (int x = 0; x < newSize.x; x++)
+                {
+                    for (int y = 0; y < newSize.y; y++)
+                    {
+                        gridState[originalPos.x + x, originalPos.y + y] = true;
+                        UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                    }
                 }
             }
 
@@ -324,12 +418,28 @@ public class SpriteInventoryGrid : MonoBehaviour
             item.Rotate();
 
             // 원래 위치 복구
-            for (int x = 0; x < originalSize.x; x++)
+            if (item.HasShape())
             {
-                for (int y = 0; y < originalSize.y; y++)
+                // Shape 기반 복구
+                foreach (Vector2Int shapeCell in item.shape)
                 {
-                    gridState[originalPos.x + x, originalPos.y + y] = true;
-                    UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                    int cellX = originalPos.x + shapeCell.x;
+                    int cellY = originalPos.y + shapeCell.y;
+                    gridState[cellX, cellY] = true;
+                    UpdateCellVisual(cellX, cellY);
+                }
+            }
+            else
+            {
+                // 기존 방식
+                Vector2Int originalSize = item.GetRotatedSize();
+                for (int x = 0; x < originalSize.x; x++)
+                {
+                    for (int y = 0; y < originalSize.y; y++)
+                    {
+                        gridState[originalPos.x + x, originalPos.y + y] = true;
+                        UpdateCellVisual(originalPos.x + x, originalPos.y + y);
+                    }
                 }
             }
 
@@ -338,6 +448,72 @@ public class SpriteInventoryGrid : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 그리드 밖 월드 좌표에 아이템 생성 (드래그 가능, 그리드에 배치되지 않음)
+    /// </summary>
+    public GameObject CreateItemOutsideGrid(GridItem item, Vector3 worldPosition)
+    {
+        if (itemPrefab == null)
+        {
+            Debug.LogError("❌ itemPrefab is null!");
+            return null;
+        }
+
+        // GridItem 설정
+        item.gridPosition = new Vector2Int(-1, -1); // 그리드 밖 표시
+
+        // GameObject 생성 (Grid의 자식으로)
+        GameObject itemObj = Instantiate(itemPrefab, worldPosition, Quaternion.identity, transform);
+        itemObj.name = $"Item_{item.itemName}";
+
+        // SpriteRenderer 설정
+        SpriteRenderer sr = itemObj.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.color = item.color;
+            if (item.sprite != null)
+                sr.sprite = item.sprite;
+            sr.sortingOrder = 10; // 그리드 위에 표시
+        }
+
+        // 크기 설정 - shape가 있으면 통짜 스프라이트이므로 0.95, 없으면 기존 방식
+        if (item.HasShape())
+        {
+            // 테트리스/펜토미노 블록 (통짜 스프라이트)
+            itemObj.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+        }
+        else
+        {
+            // 기존 아이템 (셀 조합형)
+            itemObj.transform.localScale = new Vector3(
+                item.width * cellSize * 0.95f,
+                item.height * cellSize * 0.95f,
+                1f
+            );
+        }
+
+        // Z축 기준으로 회전 (90도씩)
+        itemObj.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
+
+        // DraggableSprite 컴포넌트 초기화
+        DraggableSprite draggable = itemObj.GetComponent<DraggableSprite>();
+        if (draggable != null)
+        {
+            draggable.itemData = item;
+            draggable.grid = this;
+            Debug.Log($"✅ Created {item.itemName} outside grid at {worldPosition}");
+        }
+        else
+        {
+            Debug.LogError($"❌ DraggableSprite component not found on {itemObj.name}!");
+        }
+
+        // itemObjects Dictionary에 등록 (중복 생성 방지)
+        itemObjects[item] = itemObj;
+
+        return itemObj;
+    }
+
     // 아이템 비주얼 생성
     void CreateItemVisual(GridItem item)
     {
@@ -368,13 +544,22 @@ public class SpriteInventoryGrid : MonoBehaviour
                 sr.sprite = item.sprite;
             sr.sortingOrder = 1;
         }
-        
-        // 크기는 항상 원본 크기로 (width x height) - 회전은 rotation으로만 처리
-        itemObj.transform.localScale = new Vector3(
-            item.width * cellSize * 0.95f,
-            item.height * cellSize * 0.95f,
-            1f
-        );
+
+        // 크기 설정 - shape가 있으면 통짜 스프라이트이므로 0.95, 없으면 기존 방식
+        if (item.HasShape())
+        {
+            // 테트리스/펜토미노 블록 (통짜 스프라이트)
+            itemObj.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+        }
+        else
+        {
+            // 기존 아이템 (셀 조합형)
+            itemObj.transform.localScale = new Vector3(
+                item.width * cellSize * 0.95f,
+                item.height * cellSize * 0.95f,
+                1f
+            );
+        }
 
         // Z축 기준으로 회전 (90도씩)
         itemObj.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
@@ -413,12 +598,21 @@ public class SpriteInventoryGrid : MonoBehaviour
 
         itemObj.transform.position = itemCenter;
 
-        // 크기는 항상 원본 크기로 (width x height) - 회전은 rotation으로만 처리
-        itemObj.transform.localScale = new Vector3(
-            item.width * cellSize * 0.95f,
-            item.height * cellSize * 0.95f,
-            1f
-        );
+        // 크기 설정 - shape가 있으면 통짜 스프라이트이므로 0.95, 없으면 기존 방식
+        if (item.HasShape())
+        {
+            // 테트리스/펜토미노 블록 (통짜 스프라이트)
+            itemObj.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+        }
+        else
+        {
+            // 기존 아이템 (셀 조합형)
+            itemObj.transform.localScale = new Vector3(
+                item.width * cellSize * 0.95f,
+                item.height * cellSize * 0.95f,
+                1f
+            );
+        }
 
         // Z축 기준으로 회전 (90도씩)
         itemObj.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
@@ -524,12 +718,23 @@ public class SpriteInventoryGrid : MonoBehaviour
                                 );
 
             previewObject.transform.position = previewPos;
-            // 크기는 항상 원본 크기로 (width x height) - 회전은 rotation으로만 처리
-            previewObject.transform.localScale = new Vector3(
-                item.width * cellSize * 0.95f,
-                item.height * cellSize * 0.95f,
-                1f
-            );
+
+            // 크기 설정 - shape가 있으면 통짜 스프라이트이므로 0.95, 없으면 기존 방식
+            if (item.HasShape())
+            {
+                // 테트리스/펜토미노 블록 (통짜 스프라이트)
+                previewObject.transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+            }
+            else
+            {
+                // 기존 아이템 (셀 조합형)
+                previewObject.transform.localScale = new Vector3(
+                    item.width * cellSize * 0.95f,
+                    item.height * cellSize * 0.95f,
+                    1f
+                );
+            }
+
             // Z축 기준으로 회전
             previewObject.transform.rotation = Quaternion.Euler(0, 0, item.rotation);
 
@@ -557,19 +762,18 @@ public class SpriteInventoryGrid : MonoBehaviour
         // 기존 하이라이트 제거
         ClearCellHighlights();
 
-        Vector2Int size = item.GetRotatedSize();
         Color highlightColor = canPlace ? validPlacementColor : invalidPlacementColor;
 
         int arrayWidth = cellObjects.GetLength(0);
         int arrayHeight = cellObjects.GetLength(1);
 
-        // 각 셀 하이라이트
-        for (int x = 0; x < size.x; x++)
+        // Shape 기반 하이라이트 (테트리스/펜토미노 블록)
+        if (item.HasShape())
         {
-            for (int y = 0; y < size.y; y++)
+            foreach (Vector2Int shapeCell in item.shape)
             {
-                int cellX = position.x + x;
-                int cellY = position.y + y;
+                int cellX = position.x + shapeCell.x;
+                int cellY = position.y + shapeCell.y;
 
                 // 배열 범위 체크
                 if (cellX >= 0 && cellX < arrayWidth && cellY >= 0 && cellY < arrayHeight)
@@ -582,6 +786,36 @@ public class SpriteInventoryGrid : MonoBehaviour
                         {
                             sr.color = highlightColor;
                             highlightedCells.Add(cellObjects[cellX, cellY]);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // 기존 방식 (사각형 블록)
+            Vector2Int size = item.GetRotatedSize();
+
+            // 각 셀 하이라이트
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    int cellX = position.x + x;
+                    int cellY = position.y + y;
+
+                    // 배열 범위 체크
+                    if (cellX >= 0 && cellX < arrayWidth && cellY >= 0 && cellY < arrayHeight)
+                    {
+                        // 실제 셀이 존재하는지 확인
+                        if (cellObjects[cellX, cellY] != null)
+                        {
+                            SpriteRenderer sr = cellObjects[cellX, cellY].GetComponent<SpriteRenderer>();
+                            if (sr != null)
+                            {
+                                sr.color = highlightColor;
+                                highlightedCells.Add(cellObjects[cellX, cellY]);
+                            }
                         }
                     }
                 }
