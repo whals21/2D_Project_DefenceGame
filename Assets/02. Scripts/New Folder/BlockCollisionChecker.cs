@@ -27,6 +27,9 @@ public class BlockCollisionChecker : MonoBehaviour
 
         // 체크 중인 블록의 셀 위치들
         List<Vector2Int> checkingPositions = GetBlockCellPositionsAt(checkingBlock, targetPosition);
+        
+        // HashSet으로 변환하여 빠른 검색
+        HashSet<Vector2Int> checkingPositionsSet = new HashSet<Vector2Int>(checkingPositions);
 
         // 다른 배치된 블록들과 충돌 체크
         foreach (Block placedBlock in placedBlocks)
@@ -35,11 +38,18 @@ public class BlockCollisionChecker : MonoBehaviour
 
             if (!placedBlock.isPlacedOnGrid) continue;
 
-            List<Vector2Int> placedPositions = placedBlock.GetWorldCellPositions();
-
-            foreach (Vector2Int checkPos in checkingPositions)
+            // 배치된 블록의 실제 위치 사용 (회전 상태와 무관하게)
+            List<Vector2Int> placedPositions = placedBlock.GetLastPlacedPositions();
+            
+            // 저장된 위치가 없으면 현재 위치 사용
+            if (placedPositions.Count == 0)
             {
-                if (placedPositions.Contains(checkPos))
+                placedPositions = placedBlock.GetWorldCellPositions();
+            }
+
+            foreach (Vector2Int placedPos in placedPositions)
+            {
+                if (checkingPositionsSet.Contains(placedPos))
                 {
                     return true; // 충돌 발생
                 }

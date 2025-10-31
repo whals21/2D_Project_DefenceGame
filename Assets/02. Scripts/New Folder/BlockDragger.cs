@@ -26,6 +26,29 @@ public class BlockDragger : MonoBehaviour
         if (isDragging && Input.GetKeyDown(KeyCode.R))
         {
             block.Rotate();
+            
+            // 그리드에 배치되어 있으면 위치 업데이트 필요
+            if (block.isPlacedOnGrid && blockPlacer != null)
+            {
+                // 회전 후 위치 재계산
+                Vector2Int gridPos = block.gridPosition;
+                List<Vector2Int> cellPositions = block.GetWorldCellPositionsAt(gridPos);
+                
+                // 배치 가능 여부 확인
+                if (blockPlacer.CanPlaceBlockAt(gridPos, block, cellPositions))
+                {
+                    // 배치 가능하면 다시 배치
+                    blockPlacer.PlaceBlockOnGrid(block, gridPos);
+                }
+                else
+                {
+                    // 배치 불가능하면 원래 위치로 복귀
+                    block.Rotate();
+                    block.Rotate();
+                    block.Rotate(); // 3번 더 회전 = 원래 위치
+                }
+            }
+            
             if (blockPlacer != null)
             {
                 blockPlacer.UpdateBlockPreview(block);
@@ -59,7 +82,13 @@ public class BlockDragger : MonoBehaviour
         mousePos.z = mainCamera.WorldToScreenPoint(transform.position).z;
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(mousePos);
         
-        transform.position = worldPos + offset;
+        // 그리드에 스냅
+        Vector2Int gridPos = WorldToGridPosition(worldPos);
+        Vector3 snappedPos = new Vector3(gridPos.x, gridPos.y, 0);
+        
+        // 드래그 중에는 블록을 그리드 위치에 스냅
+        transform.position = snappedPos;
+        block.gridPosition = gridPos;
 
         // 그리드에 스냅 및 미리보기 업데이트
         if (blockPlacer != null)
@@ -74,6 +103,11 @@ public class BlockDragger : MonoBehaviour
                 blockPlacer.UpdateBlockPreview(block);
             }
         }
+    }
+
+    Vector2Int WorldToGridPosition(Vector3 worldPos)
+    {
+        return new Vector2Int(Mathf.RoundToInt(worldPos.x), Mathf.RoundToInt(worldPos.y));
     }
 
     void OnMouseUp()

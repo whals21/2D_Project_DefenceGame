@@ -10,6 +10,7 @@ public class Block : MonoBehaviour
     public GameObject cellPrefab;
     private List<GameObject> cellObjects = new List<GameObject>();
     private BlockData currentRotatedData;
+    private List<Vector2Int> lastPlacedPositions = new List<Vector2Int>(); // 마지막으로 배치된 위치들 저장
 
     void Start()
     {
@@ -70,7 +71,17 @@ public class Block : MonoBehaviour
     {
         rotation = (rotation + 1) % 4;
         currentRotatedData = null; // 캐시 초기화
-        UpdateVisualization();
+        
+        // 그리드에 배치되어 있으면 위치 업데이트
+        if (isPlacedOnGrid)
+        {
+            // 회전 후에도 같은 gridPosition 유지 (시각화만 업데이트)
+            UpdateVisualization();
+        }
+        else
+        {
+            UpdateVisualization();
+        }
     }
 
     // 블록 시각화 업데이트
@@ -106,9 +117,16 @@ public class Block : MonoBehaviour
         cellObjects.Clear();
     }
 
-    void OnDestroy()
+    // 마지막으로 배치된 위치들 반환
+    public List<Vector2Int> GetLastPlacedPositions()
     {
-        ClearCells();
+        return new List<Vector2Int>(lastPlacedPositions);
+    }
+
+    // 배치된 위치 저장
+    public void SetPlacedPositions(List<Vector2Int> positions)
+    {
+        lastPlacedPositions = new List<Vector2Int>(positions);
     }
 }
 
