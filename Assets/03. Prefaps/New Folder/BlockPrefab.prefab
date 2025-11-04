@@ -53,7 +53,7 @@ MonoBehaviour:
   gridPosition: {x: 0, y: 0}
   rotation: 0
   isPlacedOnGrid: 0
-  cellPrefab: {fileID: 2524842115467962463, guid: ce4c319e8d989c94384a58a0fd2e84b1, type: 3}
+  cellPrefab: {fileID: 2524842115467962463, guid: e102973cdfce2e446bfceae560436b6d, type: 3}
 --- !u!114 &2806282598526351504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,7 +73,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7810181799616027300}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:

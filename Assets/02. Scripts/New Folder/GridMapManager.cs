@@ -14,6 +14,9 @@ public class GridMapManager : MonoBehaviour
     public CellVisualizer cellVisualizer;
     private List<GameObject> ghostCells = new List<GameObject>();
 
+    // ✨ Cell GameObject 추적을 위한 Dictionary
+    private Dictionary<Vector2Int, GameObject> cellGameObjects = new Dictionary<Vector2Int, GameObject>();
+
 
     void Start()
     {
@@ -36,24 +39,38 @@ public class GridMapManager : MonoBehaviour
     void VisualizeGrid()
     {
         // map의 실제 데이터를 기반으로 셀 생성
-        // 중복 방지를 위해 이미 생성된 셀 체크
-        HashSet<Vector2Int> visualizedCells = new HashSet<Vector2Int>();
-        
-        foreach (Transform child in transform)
-        {
-            // 기존 셀 위치 추적 (이름이나 태그로 추적 가능)
-            visualizedCells.Add(new Vector2Int(Mathf.RoundToInt(child.position.x), Mathf.RoundToInt(child.position.y)));
-        }
-
         foreach (var kvp in map.cells)
         {
             Vector2Int pos = kvp.Key;
-            if (!visualizedCells.Contains(pos))
+
+            // 이미 생성된 Cell GameObject가 있는지 확인
+            if (!cellGameObjects.ContainsKey(pos))
             {
-                Vector3 worldPos = new Vector3(pos.x, pos.y, 0);
-                Instantiate(cellPrefab, worldPos, Quaternion.identity, transform);
+                CreateCellGameObject(pos);
             }
         }
+    }
+
+    /// <summary>
+    /// Cell GameObject 생성 및 CellCollider 컴포넌트 추가
+    /// </summary>
+    GameObject CreateCellGameObject(Vector2Int pos)
+    {
+        Vector3 worldPos = new Vector3(pos.x, pos.y, 0);
+        GameObject cellObj = Instantiate(cellPrefab, worldPos, Quaternion.identity, transform);
+
+        // ✨ CellCollider 컴포넌트 추가
+        CellCollider cellCollider = cellObj.GetComponent<CellCollider>();
+        if (cellCollider == null)
+        {
+            cellCollider = cellObj.AddComponent<CellCollider>();
+        }
+        cellCollider.Initialize(pos);
+
+        // Dictionary에 추가
+        cellGameObjects[pos] = cellObj;
+
+        return cellObj;
     }
 
     public void OnExpandCellClicked(Vector2Int pos)
@@ -72,7 +89,14 @@ public class GridMapManager : MonoBehaviour
 
     public void ShowExpandableCells()
     {
-        // 기존 고스트 셀 제거
+        // ✨ NEW: 토글 기능 - 고스트 셀이 이미 있으면 제거
+        if (ghostCells.Count > 0)
+        {
+            ClearGhostCells();
+            return;
+        }
+
+        // 기존 고스트 셀 제거 (혹시 모를 경우 대비)
         ClearGhostCells();
 
         List<Vector2Int> expandablePositions = GetExpandablePositions();
@@ -80,7 +104,7 @@ public class GridMapManager : MonoBehaviour
         foreach (Vector2Int pos in expandablePositions)
         {
             GameObject ghostCell = Instantiate(ghostCellPrefab, new Vector3(pos.x, pos.y, 0), Quaternion.identity);
-            
+
             // GhostCellClickHandler 컴포넌트 추가 및 설정
             GhostCellClickHandler clickHandler = ghostCell.GetComponent<GhostCellClickHandler>();
             if (clickHandler == null)
@@ -88,7 +112,7 @@ public class GridMapManager : MonoBehaviour
                 clickHandler = ghostCell.AddComponent<GhostCellClickHandler>();
             }
             clickHandler.Initialize(this, pos);
-            
+
             // Button 컴포넌트가 있으면 onClick 이벤트도 설정
             Button button = ghostCell.GetComponent<Button>();
             if (button != null)
@@ -96,7 +120,7 @@ public class GridMapManager : MonoBehaviour
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(() => ExpandAt(pos));
             }
-            
+
             // Collider가 없으면 추가 (클릭 감지를 위해)
             if (ghostCell.GetComponent<Collider>() == null && ghostCell.GetComponent<Collider2D>() == null)
             {
@@ -104,7 +128,7 @@ public class GridMapManager : MonoBehaviour
                 BoxCollider2D collider = ghostCell.AddComponent<BoxCollider2D>();
                 collider.isTrigger = true;
             }
-            
+
             ghostCells.Add(ghostCell);
         }
     }
@@ -194,16 +218,8 @@ public class GridMapManager : MonoBehaviour
 
         if (!cellExists)
         {
-            if (cellVisualizer != null)
-            {
-                cellVisualizer.VisualizeCell(pos);
-            }
-            else
-            {
-                // CellVisualizer가 없으면 해당 위치에 직접 생성
-                Vector3 worldPos = new Vector3(pos.x, pos.y, 0);
-                Instantiate(cellPrefab, worldPos, Quaternion.identity, transform);
-            }
+            // ✨ CreateCellGameObject 사용하여 CellCollider와 함께 생성
+            CreateCellGameObject(pos);
         }
     }
 
@@ -234,22 +250,78 @@ public class GridMapManager : MonoBehaviour
 
     public void OnBlockPlaced(Block block)
     {
-        // 블록 배치 시 호출
-        BlockCollisionChecker checker = FindObjectOfType<BlockCollisionChecker>();
-        if (checker != null)
+        // ✨ 블록이 차지하는 Cell들의 Collider 활성화
+        List<Vector2Int> cellPositions = block.GetLastPlacedPositions();
+        if (cellPositions.Count == 0)
         {
-            checker.RegisterBlock(block);
+            cellPositions = block.GetWorldCellPositions();
         }
+
+        foreach (Vector2Int pos in cellPositions)
+        {
+            if (cellGameObjects.ContainsKey(pos))
+            {
+                CellCollider cellCollider = cellGameObjects[pos].GetComponent<CellCollider>();
+                if (cellCollider != null)
+                {
+                    cellCollider.SetOccupied(true, block);
+                }
+            }
+        }
+
+        Debug.Log($"Block '{block.blockData.blockName}' placed. {cellPositions.Count} cells occupied.");
     }
 
     public void OnBlockRemoved(Block block)
     {
-        // 블록 제거 시 호출
-        BlockCollisionChecker checker = FindObjectOfType<BlockCollisionChecker>();
-        if (checker != null)
+        // ✨ 블록이 차지했던 Cell들의 Collider 비활성화
+        List<Vector2Int> cellPositions = block.GetLastPlacedPositions();
+        if (cellPositions.Count == 0)
         {
-            checker.UnregisterBlock(block);
+            cellPositions = block.GetWorldCellPositions();
         }
+
+        foreach (Vector2Int pos in cellPositions)
+        {
+            if (cellGameObjects.ContainsKey(pos))
+            {
+                CellCollider cellCollider = cellGameObjects[pos].GetComponent<CellCollider>();
+                if (cellCollider != null)
+                {
+                    cellCollider.SetOccupied(false);
+                }
+            }
+        }
+
+        Debug.Log($"Block '{block.blockData.blockName}' removed. {cellPositions.Count} cells freed.");
+    }
+
+    /// <summary>
+    /// 특정 위치의 Cell이 점유되어 있는지 확인
+    /// </summary>
+    public bool IsCellOccupied(Vector2Int pos)
+    {
+        if (cellGameObjects.ContainsKey(pos))
+        {
+            CellCollider cellCollider = cellGameObjects[pos].GetComponent<CellCollider>();
+            if (cellCollider != null)
+            {
+                return cellCollider.IsOccupied();
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Cell GameObject 가져오기
+    /// </summary>
+    public GameObject GetCellGameObject(Vector2Int pos)
+    {
+        if (cellGameObjects.ContainsKey(pos))
+        {
+            return cellGameObjects[pos];
+        }
+        return null;
     }
 
 }

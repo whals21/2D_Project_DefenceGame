@@ -66,20 +66,16 @@ public class BlockPlacer : MonoBehaviour
         if (CanPlaceBlockAt(gridPos, block, cellPositions))
         {
             PlaceBlockOnGrid(block, gridPos);
+            Debug.Log($"✅ Block '{block.blockData.blockName}' successfully placed at {gridPos}");
         }
         else
         {
-            // 배치 불가능하면 원래 위치로 되돌림
-            if (block.isPlacedOnGrid)
-            {
-                // 이미 배치된 블록이면 원래 그리드 위치로 복귀
-                block.transform.position = new Vector3(block.gridPosition.x, block.gridPosition.y, 0);
-            }
-            else
-            {
-                // 새 블록이면 그리드 밖으로 이동 (또는 원하는 위치로)
-                block.transform.position = worldPos;
-            }
+            // 배치 불가능!
+            Debug.LogWarning($"❌ Cannot place block '{block.blockData.blockName}' at {gridPos} - position occupied!");
+
+            // ✨ FIX: 배치 실패 시 아무것도 하지 않음!
+            // BlockDragger가 원래 위치로 복귀를 처리함
+            // 여기서 transform.position을 변경하면 block.gridPosition이 이미 새 위치라서 문제 발생
         }
     }
 
@@ -107,7 +103,32 @@ public class BlockPlacer : MonoBehaviour
                 return false;
             }
 
-            // 이미 다른 블록이 배치되어 있는지 확인 (현재 블록 제외)
+            // ✨ OPTION 3: GridMapManager의 IsCellOccupied()를 사용하여 CellCollider 체크
+            if (gridMapManager != null && gridMapManager.IsCellOccupied(cellPos))
+            {
+                // 자기 자신의 Cell은 허용
+                if (!currentBlockPositions.Contains(cellPos))
+                {
+                    // CellCollider에서 점유 블록 확인
+                    GameObject cellObj = gridMapManager.GetCellGameObject(cellPos);
+                    if (cellObj != null)
+                    {
+                        CellCollider cellCollider = cellObj.GetComponent<CellCollider>();
+                        if (cellCollider != null)
+                        {
+                            Block occupyingBlock = cellCollider.GetOccupyingBlock();
+                            if (occupyingBlock != null && occupyingBlock != block)
+                            {
+                                // 다른 블록이 이 Cell을 점유하고 있음!
+                                Debug.LogWarning($"[CellCollider Block] Cell {cellPos} is occupied by '{occupyingBlock.blockData.blockName}'");
+                                return false; // ❌ 배치 불가!
+                            }
+                        }
+                    }
+                }
+            }
+
+            // GridMap.IsOccupied 체크도 유지 (이중 검증)
             if (gridMap.IsOccupied(cellPos))
             {
                 // 현재 블록이 이미 배치되어 있고 해당 위치가 현재 블록의 일부인지 확인
@@ -117,23 +138,24 @@ public class BlockPlacer : MonoBehaviour
                 }
                 else
                 {
+                    Debug.LogWarning($"[GridMap Block] Cell {cellPos} is occupied");
                     return false; // 다른 블록이 차지하고 있음
                 }
             }
         }
 
-        // 충돌 체커 사용 (블록 간 충돌 체크) - GridMap.IsOccupied 체크 후에 수행
-        // GridMap.IsOccupied가 제대로 업데이트되지 않을 수 있으므로 추가 체크
+        // 충돌 체커 사용 (블록 간 충돌 체크) - 추가 안전장치
         BlockCollisionChecker collisionChecker = FindObjectOfType<BlockCollisionChecker>();
         if (collisionChecker != null)
         {
             if (collisionChecker.CheckBlockCollision(block, gridPos))
             {
+                Debug.LogWarning($"[BlockCollisionChecker] Collision detected at {gridPos}");
                 return false;
             }
         }
 
-        return true;
+        return true; // ✅ 배치 가능!
     }
 
 
@@ -178,18 +200,18 @@ public class BlockPlacer : MonoBehaviour
         // 새로운 위치 설정
         block.gridPosition = gridPos;
         block.transform.position = new Vector3(gridPos.x, gridPos.y, 0);
-        
+
         // 그리드 셀들을 occupied로 표시 (배치 전에 충돌 체크가 완료되었으므로 안전)
         List<Vector2Int> cellPositions = block.GetWorldCellPositions();
-        
+
         // 배치된 위치 저장
         block.SetPlacedPositions(cellPositions);
-        
+
         foreach (Vector2Int cellPos in cellPositions)
         {
             gridMap.SetOccupied(cellPos, true);
         }
-        
+
         block.isPlacedOnGrid = true;
 
         // GridMapManager에 블록 정보 저장 (마지막에 수행)
@@ -212,7 +234,7 @@ public class BlockPlacer : MonoBehaviour
             // 저장된 위치가 없으면 현재 위치 사용
             cellPositions = block.GetWorldCellPositions();
         }
-        
+
         foreach (Vector2Int cellPos in cellPositions)
         {
             gridMap.SetOccupied(cellPos, false);

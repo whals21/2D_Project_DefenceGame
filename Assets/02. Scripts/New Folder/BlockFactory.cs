@@ -129,7 +129,7 @@ public class BlockFactory : MonoBehaviour
 
         GameObject blockObj = Instantiate(blockPrefab, position, Quaternion.identity);
         Block block = blockObj.GetComponent<Block>();
-        
+
         if (block == null)
         {
             block = blockObj.AddComponent<Block>();
@@ -138,6 +138,10 @@ public class BlockFactory : MonoBehaviour
         block.blockData = data;
         block.cellPrefab = cellPrefab;
         block.gridPosition = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y));
+
+        // ✨ NEW: 블록을 한 번 회전시킨 상태로 스폰
+        block.Rotate();
+
         block.UpdateVisualization();
 
         // BlockDragger 추가
