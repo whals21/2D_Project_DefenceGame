@@ -160,22 +160,6 @@ public class BlockTest : MonoBehaviour
         Debug.Log("모든 블록 제거됨");
     }
 
-    void OnGUI()
-    {
-        // 화면에 안내 메시지 표시
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 16;
-        style.normal.textColor = Color.white;
-        style.alignment = TextAnchor.UpperLeft;
-
-        string instructions = "블록 테스트 컨트롤:\n" +
-                            "1-7: 테트리스 블록 생성\n" +
-                            "8-9: 펜토미노 블록 생성\n" +
-                            "Space: 랜덤 블록 생성\n" +
-                            "C: 모든 블록 제거\n" +
-                            "R: 드래그 중 블록 회전";
-
-        GUI.Label(new Rect(10, 10, 400, 200), instructions, style);
-    }
+    // OnGUI는 GameUIManager에서 통합 관리됨 (필요시 GameUIManager에 추가)
 }
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro; // TextMeshPro 사용을 위해 추가
 
 /// <summary>
 /// 새로운 적 시스템 - GridMap 기반 경로 순회
@@ -20,6 +21,9 @@ public class NewEnemy : MonoBehaviour
     [Header("Path Settings")]
     [SerializeField] private float waypointReachThreshold = 0.05f; // 웨이포인트 도달 판정 거리
 
+    [Header("HP Display")]
+    [SerializeField] private TMP_Text hpText; // TextMeshPro 체력 텍스트 (HPBar의 자식)
+
     private float currentHealth;
     private List<Vector2Int> pathPositions; // 그리드 좌표 경로
     private int currentWaypointIndex = 0;
@@ -33,6 +37,12 @@ public class NewEnemy : MonoBehaviour
         if (spriteRenderer != null)
         {
             spriteRenderer.color = normalColor;
+        }
+
+        // TextMeshPro 자동 찾기 (설정되지 않은 경우)
+        if (hpText == null)
+        {
+            hpText = GetComponentInChildren<TMP_Text>();
         }
     }
 
@@ -49,6 +59,9 @@ public class NewEnemy : MonoBehaviour
         {
             spriteRenderer.color = normalColor;
         }
+
+        // HP 텍스트 업데이트
+        UpdateHPDisplay();
 
         Debug.Log($"🔄 {gameObject.name} reset with {currentHealth} HP");
     }
@@ -123,6 +136,9 @@ public class NewEnemy : MonoBehaviour
         currentHealth -= damage;
         Debug.Log($"💥 {gameObject.name} took {damage} damage! HP: {currentHealth}/{maxHealth}");
 
+        // HP 텍스트 업데이트
+        UpdateHPDisplay();
+
         // 데미지 이펙트
         StartCoroutine(DamageFlash());
 
@@ -174,7 +190,20 @@ public class NewEnemy : MonoBehaviour
     public void Heal(float amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        UpdateHPDisplay();
         Debug.Log($"💚 {gameObject.name} healed! HP: {currentHealth}/{maxHealth}");
+    }
+
+    /// <summary>
+    /// HP 텍스트 업데이트
+    /// </summary>
+    private void UpdateHPDisplay()
+    {
+        if (hpText != null)
+        {
+            hpText.text = $"{Mathf.CeilToInt(currentHealth)}";
+            // 또는 최대 체력도 함께 표시하려면: hpText.text = $"{Mathf.CeilToInt(currentHealth)}/{Mathf.CeilToInt(maxHealth)}";
+        }
     }
 
     /// <summary>

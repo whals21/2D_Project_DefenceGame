@@ -22,8 +22,9 @@ public class TowerBase : MonoBehaviour
         MonsterBase target = GetNearestMonster();
         if(target == null) return;
 
-        Vector2 dir = (target.transform.position - transform.position).normalized;
-        transform.right = dir;
+        // 타워 회전 제거 - 원래 자리에서 가만히 있으면서 발사만 함
+        // Vector2 dir = (target.transform.position - transform.position).normalized;
+        // transform.right = dir;
 
         if(fireTimer >= 1f / fireRate)
         {

@@ -135,23 +135,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// OnGUI로 게임 상태 표시
-    /// </summary>
-    void OnGUI()
-    {
-        if (player == null) return;
-
-        GUILayout.BeginArea(new Rect(10, 310, 300, 150));
-        GUILayout.Label("=== Game Manager ===");
-        GUILayout.Label($"Money: {player.GetMoney()}");
-        GUILayout.Label($"Lives: {player.GetLives()}");
-        GUILayout.Label($"Score: {player.GetScore()}");
-        GUILayout.Label($"Game Started: {isGameStarted}");
-        GUILayout.Label($"Game Over: {isGameOver}");
-        GUILayout.Label($"Paused: {isPaused}");
-        GUILayout.EndArea();
-    }
+    // OnGUI는 GameUIManager에서 통합 관리됨
 }
 
 /// <summary>

@@ -15,5 +15,5 @@ MonoBehaviour:
   monsterName: Basic Monster
   maxHP: 50
   moveSpeed: 2
-  monsterPrefab: {fileID: 4653533247574520983, guid: 502ba64cfb7c8bf40a569a75919f0cde, type: 3}
+  monsterPrefab: {fileID: 4653533247574520983, guid: 4c55ebe30b5103541b4b74b65c191cd4, type: 3}
   spawnWeight: 10

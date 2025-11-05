@@ -283,13 +283,5 @@ public class NewEnemySpawner : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Inspector에서 상태 확인용
-    /// </summary>
-    void OnGUI()
-    {
-        GUI.Label(new Rect(10, 10, 300, 20), $"Active Enemies: {activeEnemies.Count}");
-        GUI.Label(new Rect(10, 30, 300, 20), $"Pool Available: {enemyPool.Count}");
-        GUI.Label(new Rect(10, 50, 300, 20), $"Spawning: {isSpawning}");
-    }
+    // OnGUI는 GameUIManager에서 통합 관리됨
 }

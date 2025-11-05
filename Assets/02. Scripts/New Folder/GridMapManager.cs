@@ -270,10 +270,55 @@ public class GridMapManager : MonoBehaviour
         }
 
         Debug.Log($"Block '{block.blockData.blockName}' placed. {cellPositions.Count} cells occupied.");
+
+        // ✨ 아이템 타워 블록이면 자동으로 활성화 (타워 블록보다 우선 체크)
+        ItemTowerBlock itemTowerBlock = block.GetComponent<ItemTowerBlock>();
+        if (itemTowerBlock != null)
+        {
+            itemTowerBlock.ActivateItemTower();
+            // 아이템 타워는 공격하지 않으므로 TowerBlock 활성화 건너뛰기
+        }
+        else
+        {
+            // ✨ 일반 타워 블록이면 자동으로 활성화
+            TowerBlock towerBlock = block.GetComponent<TowerBlock>();
+            if (towerBlock != null)
+            {
+                towerBlock.ActivateTower();
+            }
+        }
+
+        // ✨ BlockTowerManager에 알림 (있는 경우)
+        BlockTowerManager towerManager = FindObjectOfType<BlockTowerManager>();
+        if (towerManager != null)
+        {
+            towerManager.OnBlockPlaced(block);
+        }
     }
 
     public void OnBlockRemoved(Block block)
     {
+        // ✨ 타워 블록이면 비활성화
+        TowerBlock towerBlock = block.GetComponent<TowerBlock>();
+        if (towerBlock != null)
+        {
+            towerBlock.DeactivateTower();
+        }
+
+        // ✨ 아이템 타워 블록이면 비활성화
+        ItemTowerBlock itemTowerBlock = block.GetComponent<ItemTowerBlock>();
+        if (itemTowerBlock != null)
+        {
+            itemTowerBlock.DeactivateItemTower();
+        }
+
+        // ✨ BlockTowerManager에 알림 (있는 경우)
+        BlockTowerManager towerManager = FindObjectOfType<BlockTowerManager>();
+        if (towerManager != null)
+        {
+            towerManager.OnBlockRemoved(block);
+        }
+
         // ✨ 블록이 차지했던 Cell들의 Collider 비활성화
         List<Vector2Int> cellPositions = block.GetLastPlacedPositions();
         if (cellPositions.Count == 0)

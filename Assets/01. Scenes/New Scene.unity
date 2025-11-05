@@ -185,6 +185,7 @@ GameObject:
   - component: {fileID: 101415675}
   - component: {fileID: 101415674}
   - component: {fileID: 101415677}
+  - component: {fileID: 101415678}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -235,7 +236,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -282,6 +283,35 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &101415678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101415673}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef2a5b224b8818e468303b27c8f3bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableEdgeScrolling: 1
+  edgeScrollSpeed: 10
+  edgeThreshold: 20
+  enableKeyboardMovement: 1
+  keyboardMoveSpeed: 15
+  enableMouseDrag: 1
+  dragSpeed: 2
+  dragButton: 325
+  enableZoom: 1
+  zoomSpeed: 5
+  minZoom: 3
+  maxZoom: 20
+  useBounds: 1
+  minBounds: {x: -20, y: -20}
+  maxBounds: {x: 20, y: 20}
+  useSmoothMovement: 1
+  smoothSpeed: 10
 --- !u!1 &112639445
 GameObject:
   m_ObjectHideFlags: 0
@@ -753,7 +783,8 @@ MonoBehaviour:
   pathFinder: {fileID: 1147271135}
   monsterPathManager: {fileID: 1612000241}
   spawnInterval: 2
-  spawnPoint: {fileID: 0}
+  spawnGridPosition: {x: 0, y: 0}
+  useFirstWaypointAsSpawn: 1
 --- !u!4 &560651843
 Transform:
   m_ObjectHideFlags: 0
@@ -764,6 +795,115 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.0648772, y: 2.1324513, z: -0.020465009}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &652774705
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 652774707}
+  - component: {fileID: 652774706}
+  m_Layer: 0
+  m_Name: 'GameUIManager '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &652774706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652774705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e26fae1af29944e459dd848eb1676e51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  toggleKey: 104
+  showUI: 1
+  padding: 10
+  panelWidth: 300
+  gameManager: {fileID: 65147687}
+  blockTowerManager: {fileID: 1603906522}
+  enemySpawner: {fileID: 1312039830}
+  towerSpawner: {fileID: 667350373}
+  cameraController: {fileID: 101415678}
+--- !u!4 &652774707
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652774705}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.4483805, y: 3.1075237, z: -0.029811906}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &667350372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 667350374}
+  - component: {fileID: 667350373}
+  m_Layer: 0
+  m_Name: 'TowerSpawner '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &667350373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667350372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10a4b8041880f404093baf29503bb1cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  towerDataList:
+  - {fileID: 11400000, guid: f4a3c021a1270bc48a2cf8d75278aa48, type: 2}
+  - {fileID: 11400000, guid: 979ea8f13a0791e4cb46cb94b8c822b6, type: 2}
+  - {fileID: 11400000, guid: bfc4357331c4bd146a306771dcf97dbc, type: 2}
+  - {fileID: 11400000, guid: ec14c6f806e9cc0458177860ef382ac1, type: 2}
+  spawnPoints:
+  - {fileID: 667350374}
+  towersToSpawn: 3
+  spawnKey: 48
+  spacing: 2
+  useHorizontalLayout: 1
+  blockFactory: {fileID: 0}
+--- !u!4 &667350374
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 667350372}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.120997, y: -5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -945,7 +1085,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1312039830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -958,7 +1098,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a599c14cd2d714daa2bf3b9001a7f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 4653533247574520983, guid: 502ba64cfb7c8bf40a569a75919f0cde, type: 3}
+  enemyPrefab: {fileID: 4653533247574520983, guid: 4c55ebe30b5103541b4b74b65c191cd4, type: 3}
   poolSize: 20
   spawnInterval: 2
   pathFinder: {fileID: 1147271135}
@@ -1059,6 +1199,7 @@ MonoBehaviour:
   monsterPathCellPrefab: {fileID: 2524842115467962463, guid: a6797f34f2f66b443be62095680d1832, type: 3}
   pathFinder: {fileID: 1147271135}
   enemySpawner: {fileID: 1312039830}
+  monsterSpawner: {fileID: 0}
 --- !u!4 &1612000242
 Transform:
   m_ObjectHideFlags: 0
@@ -1345,6 +1486,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1901330720
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1901330722}
+  - component: {fileID: 1901330721}
+  m_Layer: 0
+  m_Name: 'ItemTowerSpawner '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1901330721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901330720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33f14eadbbbad1549a3a54a36835c761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemDataList:
+  - {fileID: 11400000, guid: 699faf6172a9611488a16e2a8fd04e38, type: 2}
+  - {fileID: 11400000, guid: 8166352232f9ff34089cf13749fead4b, type: 2}
+  - {fileID: 11400000, guid: 37b29ef7a2b2c6e488f050cbf008c1e4, type: 2}
+  - {fileID: 11400000, guid: 0a0be425474b0554ba816a4b896a8b1d, type: 2}
+  spawnPoints:
+  - {fileID: 1901330722}
+  itemsToSpawn: 3
+  spawnKey: 45
+  clearKey: 61
+  spacing: 2
+  useHorizontalLayout: 1
+  blockFactory: {fileID: 1624772833}
+--- !u!4 &1901330722
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901330720}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.0677214, y: -5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2068673731
 GameObject:
   m_ObjectHideFlags: 0
@@ -1601,7 +1799,10 @@ SceneRoots:
   - {fileID: 1745053821}
   - {fileID: 1612000242}
   - {fileID: 1312039831}
+  - {fileID: 560651843}
   - {fileID: 1147271136}
   - {fileID: 65147688}
-  - {fileID: 560651843}
   - {fileID: 1603906523}
+  - {fileID: 667350374}
+  - {fileID: 652774707}
+  - {fileID: 1901330722}

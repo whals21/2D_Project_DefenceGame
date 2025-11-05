@@ -237,28 +237,7 @@ public class BlockTowerManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// OnGUI로 타워 상태 표시
-    /// </summary>
-    void OnGUI()
-    {
-        GUILayout.BeginArea(new Rect(10, 100, 300, 200));
-        GUILayout.Label("=== Tower System ===");
-        GUILayout.Label($"Active Towers: {activeTowerBlocks.Count}");
-
-        Dictionary<TowerBlock.TowerType, int> typeCounts = GetTowerCountByType();
-        foreach (var kvp in typeCounts)
-        {
-            GUILayout.Label($"  {kvp.Key}: {kvp.Value}");
-        }
-
-        GUILayout.Space(10);
-        GUILayout.Label("Controls:");
-        GUILayout.Label("  T: Activate All Towers");
-        GUILayout.Label("  Y: Deactivate All Towers");
-
-        GUILayout.EndArea();
-    }
+    // OnGUI는 GameUIManager에서 통합 관리됨
 
     void OnDestroy()
     {

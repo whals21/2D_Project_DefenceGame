@@ -18,6 +18,10 @@ public class MonsterSpawner : MonoBehaviour
     [SerializeField] private Vector2Int spawnGridPosition; // 스폰할 그리드 좌표 (경로상의 특정 위치)
     [SerializeField] private bool useFirstWaypointAsSpawn = true; // true면 경로의 첫 지점에서 스폰
 
+    private bool isSpawning = false;
+    private Coroutine spawnCoroutine;
+    private List<GameObject> spawnedMonsters = new List<GameObject>(); // 생성된 몬스터 추적
+
     private void Start()
     {
         // PathFinder 자동 탐색
@@ -32,14 +36,66 @@ public class MonsterSpawner : MonoBehaviour
             monsterPathManager = FindObjectOfType<MonsterPathManager>();
         }
 
-        StartCoroutine(SpawnMonster());
+        // 자동 시작하지 않음 - MonsterPathManager가 호출할 때까지 대기
+        Debug.Log("✅ MonsterSpawner 초기화 완료 - 경로 생성 대기 중");
+    }
+
+    /// <summary>
+    /// 몬스터 스폰 시작
+    /// </summary>
+    public void StartSpawning()
+    {
+        if (isSpawning)
+        {
+            Debug.LogWarning("⚠️ MonsterSpawner: 이미 스폰 중입니다.");
+            return;
+        }
+
+        isSpawning = true;
+        spawnCoroutine = StartCoroutine(SpawnMonster());
+        Debug.Log("▶️ MonsterSpawner: 몬스터 스폰 시작");
+    }
+
+    /// <summary>
+    /// 몬스터 스폰 중지
+    /// </summary>
+    public void StopSpawning()
+    {
+        if (!isSpawning)
+        {
+            return;
+        }
+
+        isSpawning = false;
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+        }
+        Debug.Log("⏸️ MonsterSpawner: 몬스터 스폰 중지");
+    }
+
+    /// <summary>
+    /// 모든 생성된 몬스터 제거
+    /// </summary>
+    public void ClearAllMonsters()
+    {
+        foreach (GameObject monster in spawnedMonsters)
+        {
+            if (monster != null)
+            {
+                Destroy(monster);
+            }
+        }
+        spawnedMonsters.Clear();
+        Debug.Log("🧹 MonsterSpawner: 모든 몬스터 제거됨");
     }
 
     IEnumerator SpawnMonster()
     {
         yield return new WaitForSeconds(1f); //첫 몬스터 생성 전 1초 대기
 
-        while (true)
+        while (isSpawning)
         {
             // 경로 확인
             if (pathFinder == null || !pathFinder.HasPath())
@@ -112,6 +168,9 @@ public class MonsterSpawner : MonoBehaviour
             Transform[] pathTransforms = ConvertPathToTransforms(pathFinder.GetPath());
             monster.Initialize(monsterData, pathTransforms); //몬스터 초기화
         }
+
+        // 생성된 몬스터를 리스트에 추가
+        spawnedMonsters.Add(monsterObj);
 
         Debug.Log($"✅ Spawned {monsterData.monsterName} at grid position {spawnPos} (world: {spawnWorldPos})");
     }

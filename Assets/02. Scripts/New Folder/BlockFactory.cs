@@ -118,6 +118,116 @@ public class BlockFactory : MonoBehaviour
         return new BlockData("P", positions, Color.yellow);
     }
 
+    // ===== 아이템 타워용 1-3칸 블록 모양들 =====
+
+    /// <summary>
+    /// 1칸 블록 (Single Cell)
+    /// </summary>
+    public static BlockData CreateItemSingle()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0)
+        };
+        return new BlockData("Item_Single", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 2칸 블록 - 가로 (Horizontal Line)
+    /// </summary>
+    public static BlockData CreateItemLine2H()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(1, 0)
+        };
+        return new BlockData("Item_Line2H", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 2칸 블록 - 세로 (Vertical Line)
+    /// </summary>
+    public static BlockData CreateItemLine2V()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(0, 1)
+        };
+        return new BlockData("Item_Line2V", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 2칸 블록 - 대각선 (Diagonal)
+    /// </summary>
+    public static BlockData CreateItemDiagonal2()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(1, 1)
+        };
+        return new BlockData("Item_Diagonal2", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 3칸 블록 - 가로 (Horizontal Line)
+    /// </summary>
+    public static BlockData CreateItemLine3H()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(1, 0),
+            new Vector2Int(2, 0)
+        };
+        return new BlockData("Item_Line3H", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 3칸 블록 - 세로 (Vertical Line)
+    /// </summary>
+    public static BlockData CreateItemLine3V()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, 2)
+        };
+        return new BlockData("Item_Line3V", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 3칸 블록 - L자 (L Shape)
+    /// </summary>
+    public static BlockData CreateItemL3()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(1, 0)
+        };
+        return new BlockData("Item_L3", positions, Color.yellow);
+    }
+
+    /// <summary>
+    /// 3칸 블록 - T자 (T Shape)
+    /// </summary>
+    public static BlockData CreateItemT3()
+    {
+        List<Vector2Int> positions = new List<Vector2Int>
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(1, 0),
+            new Vector2Int(2, 0),
+            new Vector2Int(1, 1)
+        };
+        return new BlockData("Item_T3", positions, Color.yellow);
+    }
+
     // 블록 생성
     public Block CreateBlock(BlockData data, Vector3 position)
     {

@@ -60,8 +60,8 @@ public class TowerBlock : MonoBehaviour
 
     void Start()
     {
-        // 블록이 이미 그리드에 배치되어 있으면 타워 활성화
-        if (block != null && block.isPlacedOnGrid)
+        // 블록이 이미 그리드에 배치되어 있으면 타워 활성화 (백업용 - GridMapManager가 이미 호출했을 가능성이 높음)
+        if (block != null && block.isPlacedOnGrid && !isTowerActive)
         {
             ActivateTower();
         }

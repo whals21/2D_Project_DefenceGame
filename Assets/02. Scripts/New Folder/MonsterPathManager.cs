@@ -16,7 +16,8 @@ public class MonsterPathManager : MonoBehaviour
 
     [Header("Enemy System References")]
     public NewPathFinder pathFinder; // 경로 계산 시스템
-    public NewEnemySpawner enemySpawner; // 적 생성 시스템
+    public NewEnemySpawner enemySpawner; // 적 생성 시스템 (오브젝트 풀)
+    public MonsterSpawner monsterSpawner; // 몬스터 생성 시스템
 
     private List<GameObject> pathCells = new List<GameObject>();
     private List<Vector2Int> pathPositions = new List<Vector2Int>(); // 경로 위치 순서대로 저장
@@ -33,7 +34,7 @@ public class MonsterPathManager : MonoBehaviour
             Debug.LogError("MonsterPathManager: GridMapManager를 찾을 수 없습니다.");
         }
 
-        // PathFinder와 EnemySpawner 자동 탐색
+        // PathFinder와 Spawner들 자동 탐색
         if (pathFinder == null)
         {
             pathFinder = FindObjectOfType<NewPathFinder>();
@@ -42,6 +43,11 @@ public class MonsterPathManager : MonoBehaviour
         if (enemySpawner == null)
         {
             enemySpawner = FindObjectOfType<NewEnemySpawner>();
+        }
+
+        if (monsterSpawner == null)
+        {
+            monsterSpawner = FindObjectOfType<MonsterSpawner>();
         }
     }
 
@@ -57,14 +63,21 @@ public class MonsterPathManager : MonoBehaviour
         {
             ClearPathCells();
 
-            // 적 스폰 중지
+            // NewEnemySpawner (오브젝트 풀) 중지
             if (enemySpawner != null)
             {
                 enemySpawner.StopSpawning();
                 enemySpawner.ClearAllEnemies();
-                Debug.Log("🛑 몬스터 경로 제거 - 적 스폰 중지 및 모든 적 제거");
             }
 
+            // MonsterSpawner 중지
+            if (monsterSpawner != null)
+            {
+                monsterSpawner.StopSpawning();
+                monsterSpawner.ClearAllMonsters();
+            }
+
+            Debug.Log("🛑 몬스터 경로 제거 - 모든 스폰 중지 및 적 제거");
             return;
         }
 
@@ -113,11 +126,18 @@ public class MonsterPathManager : MonoBehaviour
         if (enemySpawner != null)
         {
             enemySpawner.StartSpawning();
-            Debug.Log("▶️ 적 스폰 시작");
+            Debug.Log("▶️ NewEnemySpawner 스폰 시작");
         }
-        else
+
+        if (monsterSpawner != null)
         {
-            Debug.LogWarning("⚠️ EnemySpawner가 설정되지 않아 적 스폰을 건너뜁니다.");
+            monsterSpawner.StartSpawning();
+            Debug.Log("▶️ MonsterSpawner 스폰 시작");
+        }
+
+        if (enemySpawner == null && monsterSpawner == null)
+        {
+            Debug.LogWarning("⚠️ 스폰 시스템이 설정되지 않아 적 스폰을 건너뜁니다.");
         }
     }
 
