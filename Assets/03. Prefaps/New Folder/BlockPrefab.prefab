@@ -11,10 +11,11 @@ GameObject:
   - component: {fileID: 1350994731463480732}
   - component: {fileID: 1183377206977825631}
   - component: {fileID: 2806282598526351504}
+  - component: {fileID: 1006156915001588966}
   - component: {fileID: 4684389711375814419}
   m_Layer: 0
   m_Name: BlockPrefab
-  m_TagString: Untagged
+  m_TagString: Tower
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -66,6 +67,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2ecb6c2970b95845be1ded6cd606d08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1006156915001588966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7810181799616027300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89fdafd165a8e3c46827c9aebc87232f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  towerType: 1
+  attackRange: 4
+  fireRate: 1
+  damage: 1
+  bulletPrefab: {fileID: 4027066340204674297, guid: 5d65e3b8d81f4864ca6ee504e3ec064a, type: 3}
+  firePoint: {fileID: 1350994731463480732}
+  attackEffectDuration: 0.2
+  slashEffectPrefab: {fileID: 0}
+  attackEffectColor: {r: 1, g: 0, b: 0, a: 1}
+  bulletSpeed: 10
+  bulletLifeTime: 2
+  explosionRadius: 2
+  explosionEffectPrefab: {fileID: 0}
+  glowDuration: 1
+  glowColor: {r: 0, g: 1, b: 0, a: 1}
+  slowAmount: 0.5
+  glowRadius: 2
+  glowEffectPrefab: {fileID: 0}
 --- !u!61 &4684389711375814419
 BoxCollider2D:
   m_ObjectHideFlags: 0

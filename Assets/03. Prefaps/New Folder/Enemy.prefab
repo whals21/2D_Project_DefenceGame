@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2083337203901332847}
   - component: {fileID: 4921080366589294103}
-  - component: {fileID: 7569541310265552508}
+  - component: {fileID: -6809801190927266067}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Monster
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &7569541310265552508
+--- !u!114 &-6809801190927266067
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,10 +94,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 4653533247574520983}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a69c35a7d3f68c04985eb567c24b43ab, type: 3}
+  m_Script: {fileID: 11500000, guid: 51cbdacfaf516e249b20c2671e3010ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
-  moveSpeed: 8
+  moveSpeed: 5
   normalColor: {r: 1, g: 0, b: 0, a: 1}
   damageColor: {r: 1, g: 1, b: 1, a: 1}
+  waypointReachThreshold: 0.05

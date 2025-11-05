@@ -6,11 +6,18 @@ using UnityEngine.UI;
 /// 몬스터 경로 관리 시스템
 /// 그리드 외곽을 둘러싼 고스트 셀을 생성하여 몬스터가 순회할 경로를 정의
 /// ShowExpandableCells()와 달리 대각선 모서리 부분도 포함
+/// 고스트 셀 생성 시 자동으로 경로 재계산 및 적 스폰 시작
 /// </summary>
 public class MonsterPathManager : MonoBehaviour
 {
+    [Header("Grid References")]
     public GridMapManager gridMapManager;
     public GameObject monsterPathCellPrefab; // 몬스터 경로용 고스트 셀 프리팹
+
+    [Header("Enemy System References")]
+    public NewPathFinder pathFinder; // 경로 계산 시스템
+    public NewEnemySpawner enemySpawner; // 적 생성 시스템
+
     private List<GameObject> pathCells = new List<GameObject>();
     private List<Vector2Int> pathPositions = new List<Vector2Int>(); // 경로 위치 순서대로 저장
 
@@ -25,18 +32,39 @@ public class MonsterPathManager : MonoBehaviour
         {
             Debug.LogError("MonsterPathManager: GridMapManager를 찾을 수 없습니다.");
         }
+
+        // PathFinder와 EnemySpawner 자동 탐색
+        if (pathFinder == null)
+        {
+            pathFinder = FindObjectOfType<NewPathFinder>();
+        }
+
+        if (enemySpawner == null)
+        {
+            enemySpawner = FindObjectOfType<NewEnemySpawner>();
+        }
     }
 
     /// <summary>
     /// 몬스터 경로 고스트 셀 표시
     /// 그리드 외곽을 시계방향으로 순회하는 경로 생성 (대각선 모서리 포함)
+    /// 고스트 셀 생성 시 자동으로 경로 재계산 및 적 스폰 시작
     /// </summary>
     public void ShowMonsterPath()
     {
-        // ✨ NEW: 토글 기능 - 경로 셀이 이미 있으면 제거
+        // ✨ NEW: 토글 기능 - 경로 셀이 이미 있으면 제거하고 적 스폰 중지
         if (pathCells.Count > 0)
         {
             ClearPathCells();
+
+            // 적 스폰 중지
+            if (enemySpawner != null)
+            {
+                enemySpawner.StopSpawning();
+                enemySpawner.ClearAllEnemies();
+                Debug.Log("🛑 몬스터 경로 제거 - 적 스폰 중지 및 모든 적 제거");
+            }
+
             return;
         }
 
@@ -68,7 +96,29 @@ public class MonsterPathManager : MonoBehaviour
         // 경로 위치 저장 (순서대로)
         pathPositions = new List<Vector2Int>(perimeterPositions);
 
-        Debug.Log($"몬스터 경로 생성 완료: {pathPositions.Count}개의 경로 포인트");
+        Debug.Log($"✅ 몬스터 경로 생성 완료: {pathPositions.Count}개의 경로 포인트");
+
+        // ✨ NEW: 경로 생성 후 자동으로 PathFinder 경로 재계산
+        if (pathFinder != null)
+        {
+            pathFinder.RecalculatePath();
+            Debug.Log("🔄 PathFinder 경로 재계산 완료");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ PathFinder가 설정되지 않아 경로 재계산을 건너뜁니다.");
+        }
+
+        // ✨ NEW: 경로 생성 후 자동으로 적 스폰 시작
+        if (enemySpawner != null)
+        {
+            enemySpawner.StartSpawning();
+            Debug.Log("▶️ 적 스폰 시작");
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ EnemySpawner가 설정되지 않아 적 스폰을 건너뜁니다.");
+        }
     }
 
     /// <summary>

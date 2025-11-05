@@ -6,6 +6,9 @@ TagManager:
   tags:
   - PathTile
   - Cell
+  - Monster
+  - Bullet
+  - Tower
   layers:
   - Default
   - TransparentFX
@@ -15,11 +18,11 @@ TagManager:
   - UI
   - Grid
   - Items
+  - Monster
+  - Tower
+  - Bullet
   - GridCell
   - Block
-  - 
-  - 
-  - 
   - 
   - 
   - 
