@@ -298,6 +298,43 @@ public class GridMapManager : MonoBehaviour
 
     public void OnBlockRemoved(Block block)
     {
+        if (block == null)
+        {
+            Debug.LogWarning("⚠️ OnBlockRemoved called with null block!");
+            return;
+        }
+
+        // ✨ CRITICAL FIX: 먼저 Cell들을 해제해야 함! (타워 비활성화보다 우선)
+        // 블록이 차지했던 Cell들의 Collider 비활성화
+        List<Vector2Int> cellPositions = block.GetLastPlacedPositions();
+        if (cellPositions.Count == 0)
+        {
+            cellPositions = block.GetWorldCellPositions();
+        }
+
+        Debug.Log($"🧹 OnBlockRemoved: Freeing {cellPositions.Count} cells for block '{block.blockData.blockName}'");
+
+        foreach (Vector2Int pos in cellPositions)
+        {
+            if (cellGameObjects.ContainsKey(pos))
+            {
+                CellCollider cellCollider = cellGameObjects[pos].GetComponent<CellCollider>();
+                if (cellCollider != null)
+                {
+                    cellCollider.SetOccupied(false);
+                    Debug.Log($"  ✅ Cell {pos} freed (was occupied by {block.blockData.blockName})");
+                }
+                else
+                {
+                    Debug.LogWarning($"  ⚠️ Cell {pos} has no CellCollider!");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"  ⚠️ Cell {pos} not found in cellGameObjects dictionary!");
+            }
+        }
+
         // ✨ 타워 블록이면 비활성화
         TowerBlock towerBlock = block.GetComponent<TowerBlock>();
         if (towerBlock != null)
@@ -319,26 +356,7 @@ public class GridMapManager : MonoBehaviour
             towerManager.OnBlockRemoved(block);
         }
 
-        // ✨ 블록이 차지했던 Cell들의 Collider 비활성화
-        List<Vector2Int> cellPositions = block.GetLastPlacedPositions();
-        if (cellPositions.Count == 0)
-        {
-            cellPositions = block.GetWorldCellPositions();
-        }
-
-        foreach (Vector2Int pos in cellPositions)
-        {
-            if (cellGameObjects.ContainsKey(pos))
-            {
-                CellCollider cellCollider = cellGameObjects[pos].GetComponent<CellCollider>();
-                if (cellCollider != null)
-                {
-                    cellCollider.SetOccupied(false);
-                }
-            }
-        }
-
-        Debug.Log($"Block '{block.blockData.blockName}' removed. {cellPositions.Count} cells freed.");
+        Debug.Log($"✅ OnBlockRemoved complete: Block '{block.blockData.blockName}' removed, {cellPositions.Count} cells freed.");
     }
 
     /// <summary>

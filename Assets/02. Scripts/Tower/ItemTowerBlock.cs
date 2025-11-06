@@ -133,7 +133,7 @@ public class ItemTowerBlock : MonoBehaviour
     }
 
     /// <summary>
-    /// 인접한 타워 블록들 찾기
+    /// 인접한 타워 블록들 찾기 (상하좌우 직접 인접만)
     /// </summary>
     List<TowerBlock> FindNearbyTowers()
     {
@@ -145,30 +145,35 @@ public class ItemTowerBlock : MonoBehaviour
         // 이 아이템 타워가 차지하는 모든 셀 위치
         List<Vector2Int> itemPositions = block.GetWorldCellPositions();
 
-        // 체크할 범위 계산 (각 셀 주변 buffRange 범위)
+        // 상하좌우 4방향만 체크 (대각선 제외)
+        Vector2Int[] directions = new Vector2Int[]
+        {
+            new Vector2Int(0, 1),   // 위
+            new Vector2Int(0, -1),  // 아래
+            new Vector2Int(-1, 0),  // 왼쪽
+            new Vector2Int(1, 0)    // 오른쪽
+        };
+
         HashSet<Vector2Int> checkedPositions = new HashSet<Vector2Int>();
 
         foreach (Vector2Int itemPos in itemPositions)
         {
-            // 각 방향으로 buffRange만큼 탐색
-            for (int x = -itemData.buffRange; x <= itemData.buffRange; x++)
+            // 상하좌우 4방향만 체크
+            foreach (Vector2Int dir in directions)
             {
-                for (int y = -itemData.buffRange; y <= itemData.buffRange; y++)
+                Vector2Int checkPos = itemPos + dir;
+
+                // 이미 체크했거나 아이템 타워 자신의 위치면 스킵
+                if (checkedPositions.Contains(checkPos) || itemPositions.Contains(checkPos))
+                    continue;
+
+                checkedPositions.Add(checkPos);
+
+                // 해당 위치의 타워 블록 찾기
+                TowerBlock towerBlock = FindTowerAtPosition(checkPos);
+                if (towerBlock != null && !nearbyTowers.Contains(towerBlock))
                 {
-                    Vector2Int checkPos = itemPos + new Vector2Int(x, y);
-
-                    // 이미 체크했거나 아이템 타워 자신의 위치면 스킵
-                    if (checkedPositions.Contains(checkPos) || itemPositions.Contains(checkPos))
-                        continue;
-
-                    checkedPositions.Add(checkPos);
-
-                    // 해당 위치의 타워 블록 찾기
-                    TowerBlock towerBlock = FindTowerAtPosition(checkPos);
-                    if (towerBlock != null && !nearbyTowers.Contains(towerBlock))
-                    {
-                        nearbyTowers.Add(towerBlock);
-                    }
+                    nearbyTowers.Add(towerBlock);
                 }
             }
         }
@@ -318,7 +323,7 @@ public class ItemTowerBlock : MonoBehaviour
     }
 
     /// <summary>
-    /// 아이템 타워와 접촉하는 타워 블록의 셀들 찾기
+    /// 타워 블록과 접촉하는 아이템 타워의 셀들 찾기 (아이템 타워 셀을 반환)
     /// </summary>
     List<SpriteRenderer> FindContactCells(TowerBlock tower)
     {
@@ -329,7 +334,6 @@ public class ItemTowerBlock : MonoBehaviour
 
         // 아이템 타워가 차지하는 셀 위치들
         List<Vector2Int> itemPositions = block.GetWorldCellPositions();
-        HashSet<Vector2Int> itemPosSet = new HashSet<Vector2Int>(itemPositions);
 
         // 타워 블록이 차지하는 셀 위치들
         Block towerBlock = tower.GetComponent<Block>();
@@ -337,34 +341,31 @@ public class ItemTowerBlock : MonoBehaviour
             return contactCells;
 
         List<Vector2Int> towerPositions = towerBlock.GetWorldCellPositions();
+        HashSet<Vector2Int> towerPosSet = new HashSet<Vector2Int>(towerPositions);
 
-        // 타워 블록의 모든 자식 SpriteRenderer 가져오기
-        SpriteRenderer[] allRenderers = towerBlock.GetComponentsInChildren<SpriteRenderer>();
+        // 아이템 타워의 모든 자식 SpriteRenderer 가져오기
+        SpriteRenderer[] allRenderers = block.GetComponentsInChildren<SpriteRenderer>();
 
-        // 각 타워 셀 위치에 대해 인접성 체크
-        for (int i = 0; i < towerPositions.Count && i < allRenderers.Length; i++)
+        // 상하좌우 4방향만 체크 (대각선 제외)
+        Vector2Int[] directions = new Vector2Int[]
         {
-            Vector2Int towerPos = towerPositions[i];
+            new Vector2Int(0, 1),   // 위
+            new Vector2Int(0, -1),  // 아래
+            new Vector2Int(-1, 0),  // 왼쪽
+            new Vector2Int(1, 0)    // 오른쪽
+        };
 
-            // 8방향 인접 체크 (상하좌우 + 대각선)
-            Vector2Int[] directions = new Vector2Int[]
-            {
-                new Vector2Int(0, 1),   // 위
-                new Vector2Int(0, -1),  // 아래
-                new Vector2Int(-1, 0),  // 왼쪽
-                new Vector2Int(1, 0),   // 오른쪽
-                new Vector2Int(-1, 1),  // 좌상단
-                new Vector2Int(1, 1),   // 우상단
-                new Vector2Int(-1, -1), // 좌하단
-                new Vector2Int(1, -1)   // 우하단
-            };
+        // 각 아이템 타워 셀 위치에 대해 인접성 체크
+        for (int i = 0; i < itemPositions.Count && i < allRenderers.Length; i++)
+        {
+            Vector2Int itemPos = itemPositions[i];
 
-            // 인접한 위치에 아이템 타워 셀이 있는지 확인
+            // 인접한 위치에 타워 블록 셀이 있는지 확인
             bool isContact = false;
             foreach (Vector2Int dir in directions)
             {
-                Vector2Int checkPos = towerPos + dir;
-                if (itemPosSet.Contains(checkPos))
+                Vector2Int checkPos = itemPos + dir;
+                if (towerPosSet.Contains(checkPos))
                 {
                     isContact = true;
                     break;
@@ -378,7 +379,7 @@ public class ItemTowerBlock : MonoBehaviour
             }
         }
 
-        Debug.Log($"✨ {tower.gameObject.name}의 {contactCells.Count}개 셀이 아이템 타워와 접촉!");
+        Debug.Log($"✨ 아이템 타워의 {contactCells.Count}개 셀이 {tower.gameObject.name}와 접촉!");
         return contactCells;
     }
 

@@ -88,7 +88,11 @@ public class MonsterSpawner : MonoBehaviour
             }
         }
         spawnedMonsters.Clear();
-        Debug.Log("🧹 MonsterSpawner: 모든 몬스터 제거됨");
+
+        // ✨ 몬스터를 모두 제거할 때 기존 Waypoint도 제거
+        ClearExistingWaypoints();
+
+        Debug.Log("🧹 MonsterSpawner: 모든 몬스터 및 Waypoint 제거됨");
     }
 
     IEnumerator SpawnMonster()
@@ -184,6 +188,9 @@ public class MonsterSpawner : MonoBehaviour
         if (gridPath == null || gridPath.Count == 0)
             return new Transform[0];
 
+        // ✨ REMOVED: Waypoint 제거를 여기서 하지 않음 (몬스터가 사용 중일 수 있음)
+        // 대신 ClearAllMonsters()에서 제거
+
         Transform[] transforms = new Transform[gridPath.Count];
 
         for (int i = 0; i < gridPath.Count; i++)
@@ -196,5 +203,21 @@ public class MonsterSpawner : MonoBehaviour
         }
 
         return transforms;
+    }
+
+    /// <summary>
+    /// MonsterSpawner의 모든 기존 Waypoint 자식 오브젝트 제거
+    /// </summary>
+    void ClearExistingWaypoints()
+    {
+        // MonsterSpawner의 자식 중 "Waypoint_"로 시작하는 모든 오브젝트 제거
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Transform child = transform.GetChild(i);
+            if (child.name.StartsWith("Waypoint_"))
+            {
+                Destroy(child.gameObject);
+            }
+        }
     }
 }

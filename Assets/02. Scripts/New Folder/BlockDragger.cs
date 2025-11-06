@@ -65,8 +65,8 @@ public class BlockDragger : MonoBehaviour
             EndDrag();
         }
 
-        // 드래그 중 R키로 회전
-        if (isDragging && Input.GetKeyDown(KeyCode.R))
+        // 드래그 중 회전 키로 회전
+        if (isDragging && KeyBindingManager.Instance != null && KeyBindingManager.Instance.GetRotateBlockKeyDown())
         {
             RotateBlock();
         }

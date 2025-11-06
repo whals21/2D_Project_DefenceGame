@@ -182,19 +182,17 @@ public class BlockPlacer : MonoBehaviour
     {
         if (gridMap == null) return;
 
-        // 기존 위치에서 제거 (이미 배치된 경우)
-        // 먼저 기존 위치를 제거해서 다른 블록이 해당 위치를 사용할 수 있도록 함
+        Debug.Log($"📍 PlaceBlockOnGrid: Placing '{block.blockData.blockName}' at {gridPos}, isPlacedOnGrid={block.isPlacedOnGrid}");
+
+        // ✨ CRITICAL FIX: 기존 위치에서 제거 (이미 배치된 경우)
+        // GridMapManager.OnBlockRemoved()를 호출하여 CellCollider도 함께 해제
         if (block.isPlacedOnGrid)
         {
-            // 마지막으로 배치된 위치 사용
-            List<Vector2Int> oldPositions = block.GetLastPlacedPositions();
-            if (oldPositions.Count > 0)
-            {
-                foreach (Vector2Int oldPos in oldPositions)
-                {
-                    gridMap.SetOccupied(oldPos, false);
-                }
-            }
+            Debug.Log($"  🔄 Block was already placed. Removing from old position first...");
+
+            // ✨ RemoveBlockFromGrid를 호출하여 완전히 제거
+            // (GridMap.SetOccupied + GridMapManager.OnBlockRemoved)
+            RemoveBlockFromGrid(block);
         }
 
         // 새로운 위치 설정
@@ -207,6 +205,7 @@ public class BlockPlacer : MonoBehaviour
         // 배치된 위치 저장
         block.SetPlacedPositions(cellPositions);
 
+        Debug.Log($"  📌 Setting {cellPositions.Count} cells as occupied in GridMap...");
         foreach (Vector2Int cellPos in cellPositions)
         {
             gridMap.SetOccupied(cellPos, true);
@@ -215,10 +214,14 @@ public class BlockPlacer : MonoBehaviour
         block.isPlacedOnGrid = true;
 
         // GridMapManager에 블록 정보 저장 (마지막에 수행)
+        // 여기서 CellCollider도 활성화됨
         if (gridMapManager != null)
         {
+            Debug.Log($"  🔔 Calling GridMapManager.OnBlockPlaced()...");
             gridMapManager.OnBlockPlaced(block);
         }
+
+        Debug.Log($"✅ PlaceBlockOnGrid complete: '{block.blockData.blockName}' placed at {gridPos}");
     }
 
     public void RemoveBlockFromGrid(Block block)

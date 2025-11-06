@@ -298,15 +298,31 @@ public class NewPathFinder : MonoBehaviour
 
     void Update()
     {
-        // 테스트용 키보드 단축키
-        if (Input.GetKeyDown(KeyCode.P))
+        // 테스트용 키보드 단축키 - KeyBindingManager 사용
+        if (KeyBindingManager.Instance != null)
         {
-            PrintPathInfo();
-        }
+            if (KeyBindingManager.Instance.GetShowMonsterPathKeyDown())
+            {
+                PrintPathInfo();
+            }
 
-        if (Input.GetKeyDown(KeyCode.R))
+            if (KeyBindingManager.Instance.GetTestPathfindingKeyDown())
+            {
+                RecalculatePath();
+            }
+        }
+        else
         {
-            RecalculatePath();
+            // KeyBindingManager가 없으면 기본 키 사용 (fallback)
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                PrintPathInfo();
+            }
+
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                RecalculatePath();
+            }
         }
     }
 }

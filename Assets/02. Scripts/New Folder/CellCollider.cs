@@ -43,6 +43,8 @@ public class CellCollider : MonoBehaviour
     /// </summary>
     public void SetOccupied(bool occupied, Block block = null)
     {
+        string previousState = $"Occupied={isOccupiedByBlock}, Block={( occupyingBlock != null ? occupyingBlock.blockData.blockName : "None")}";
+
         isOccupiedByBlock = occupied;
         occupyingBlock = block;
 
@@ -55,11 +57,11 @@ public class CellCollider : MonoBehaviour
         // 디버그 로그
         if (occupied)
         {
-            Debug.Log($"Cell {gridPosition} is now occupied by {(block != null ? block.blockData.blockName : "Unknown")}");
+            Debug.Log($"🔒 Cell {gridPosition} is now OCCUPIED by {(block != null ? block.blockData.blockName : "Unknown")} (was: {previousState})");
         }
         else
         {
-            Debug.Log($"Cell {gridPosition} is now free");
+            Debug.Log($"🔓 Cell {gridPosition} is now FREE (was: {previousState})");
         }
     }
 

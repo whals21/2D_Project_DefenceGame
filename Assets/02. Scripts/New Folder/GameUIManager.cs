@@ -79,6 +79,14 @@ public class GameUIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// KeyBindingManager에서 키 바인딩 정보를 가져와서 UI 문자열 생성
+    /// </summary>
+    string GetKeyBindingString(KeyCode key, string description)
+    {
+        return $"  [{key}]: {description}";
+    }
+
     void InitializeStyles()
     {
         if (stylesInitialized) return;
@@ -249,24 +257,70 @@ public class GameUIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 전체 컨트롤 안내 (우측 하단)
+    /// 전체 컨트롤 안내 (우측 하단) - KeyBindingManager 연동
     /// </summary>
     void DrawControlsPanel()
     {
         int x = Screen.width - panelWidth - padding;
         int y = 380;
 
-        GUILayout.BeginArea(new Rect(x, y, panelWidth, 200));
+        GUILayout.BeginArea(new Rect(x, y, panelWidth, 300));
         GUILayout.Label("=== Game Controls ===", headerStyle);
-        GUILayout.Label("Block Controls:", normalStyle);
-        GUILayout.Label("  1-9: Spawn Blocks", normalStyle);
-        GUILayout.Label("  Space: Random Block", normalStyle);
-        GUILayout.Label("  R: Rotate Block", normalStyle);
-        GUILayout.Space(5);
-        GUILayout.Label("Enemy Controls:", normalStyle);
-        GUILayout.Label("  S: Toggle Enemy Spawning", normalStyle);
-        GUILayout.Label("  N: Spawn One Enemy", normalStyle);
-        GUILayout.Label("  K: Clear All Enemies", normalStyle);
+
+        // KeyBindingManager가 있으면 자동으로 키 바인딩 표시
+        if (KeyBindingManager.Instance != null)
+        {
+            // 블록 조작
+            GUILayout.Label("Block Controls:", normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.RotateBlockKey,
+                KeyBindingManager.Instance.rotateBlockDescription), normalStyle);
+
+            GUILayout.Space(5);
+
+            // 타워
+            GUILayout.Label("Tower Controls:", normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.SpawnTowerKey,
+                KeyBindingManager.Instance.spawnTowerDescription), normalStyle);
+
+            GUILayout.Space(5);
+
+            // 아이템 타워
+            GUILayout.Label("Item Tower Controls:", normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.SpawnItemTowerKey,
+                KeyBindingManager.Instance.spawnItemTowerDescription), normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.ClearItemTowerKey,
+                KeyBindingManager.Instance.clearItemTowerDescription), normalStyle);
+
+            GUILayout.Space(5);
+
+            // 그리드 & 몬스터
+            GUILayout.Label("Grid & Monster Controls:", normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.ShowExpandableCellsKey,
+                KeyBindingManager.Instance.showExpandableCellsDescription), normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.ShowMonsterPathKey,
+                KeyBindingManager.Instance.showMonsterPathDescription), normalStyle);
+            GUILayout.Label(GetKeyBindingString(
+                KeyBindingManager.Instance.ToggleMonsterSpawnKey,
+                KeyBindingManager.Instance.toggleMonsterSpawnDescription), normalStyle);
+        }
+        else
+        {
+            // KeyBindingManager가 없으면 기본 안내
+            GUILayout.Label("Block Controls:", normalStyle);
+            GUILayout.Label("  [R]: Rotate Block", normalStyle);
+            GUILayout.Label("Tower Controls:", normalStyle);
+            GUILayout.Label("  [T]: Spawn Tower", normalStyle);
+            GUILayout.Label("Item Tower Controls:", normalStyle);
+            GUILayout.Label("  [-]: Spawn Item Towers", normalStyle);
+            GUILayout.Label("  [=]: Clear Item Towers", normalStyle);
+        }
+
         GUILayout.EndArea();
     }
 

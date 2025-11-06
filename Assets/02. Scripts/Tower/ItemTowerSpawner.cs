@@ -50,14 +50,14 @@ public class ItemTowerSpawner : MonoBehaviour
 
     void Update()
     {
-        // Minus(-) 키를 누르면 아이템 타워 스폰
-        if (Input.GetKeyDown(spawnKey))
+        // KeyBindingManager에서 설정한 키로 아이템 타워 스폰
+        if (KeyBindingManager.Instance != null && KeyBindingManager.Instance.GetSpawnItemTowerKeyDown())
         {
             SpawnRandomItemTowers();
         }
 
-        // Equals(=) 키로 생성된 아이템 타워 모두 제거
-        if (Input.GetKeyDown(clearKey))
+        // KeyBindingManager에서 설정한 키로 생성된 아이템 타워 모두 제거
+        if (KeyBindingManager.Instance != null && KeyBindingManager.Instance.GetClearItemTowerKeyDown())
         {
             ClearSpawnedItems();
         }
@@ -174,11 +174,54 @@ public class ItemTowerSpawner : MonoBehaviour
         // 블록 이름 변경
         block.gameObject.name = $"{itemData.itemName}_{randomBlockShape.blockName}";
 
-        // 자식 CellVisual들의 색상을 아이템 색상으로 변경
+        // ✨ CRITICAL: TowerBlock과 TowerBase 컴포넌트 제거 (아이템 타워는 공격하면 안 됨!)
+        TowerBlock existingTowerBlock = block.GetComponent<TowerBlock>();
+        if (existingTowerBlock != null)
+        {
+            DestroyImmediate(existingTowerBlock);
+            Debug.Log($"⚠️ Removed TowerBlock component from {block.gameObject.name}");
+        }
+
+        // TowerBase 상속 컴포넌트들도 모두 제거 (RangeTower_1 등)
+        TowerBase[] towerBases = block.GetComponents<TowerBase>();
+        foreach (TowerBase towerBase in towerBases)
+        {
+            if (towerBase != null)
+            {
+                DestroyImmediate(towerBase);
+                Debug.Log($"⚠️ Removed {towerBase.GetType().Name} component from {block.gameObject.name}");
+            }
+        }
+
+        // CircleCollider2D도 제거 (타워 사거리용)
+        CircleCollider2D circleCollider = block.GetComponent<CircleCollider2D>();
+        if (circleCollider != null)
+        {
+            DestroyImmediate(circleCollider);
+            Debug.Log($"⚠️ Removed CircleCollider2D from {block.gameObject.name}");
+        }
+
+        // ✨ 자식 CellVisual들의 시각적 효과 적용 (아이템 타워 구별용)
         SpriteRenderer[] cellRenderers = block.GetComponentsInChildren<SpriteRenderer>();
         foreach (SpriteRenderer renderer in cellRenderers)
         {
+            // 1. 색상 적용
             renderer.color = itemData.itemColor;
+
+            // 2. 약간 반투명하게 설정 (일반 타워와 구별)
+            Color colorWithAlpha = itemData.itemColor;
+            colorWithAlpha.a = 0.85f; // 85% 불투명도
+            renderer.color = colorWithAlpha;
+
+            // 3. 렌더링 순서 변경 (위에 보이도록)
+            renderer.sortingOrder = 5;
+
+            // 4. Material 속성 변경 (밝기 증가)
+            if (renderer.material != null)
+            {
+                // Sprite-Default 머티리얼의 색상 속성 조정
+                renderer.material.color = Color.white;
+            }
         }
 
         // ItemTowerBlock 컴포넌트 추가 또는 가져오기
@@ -197,10 +240,54 @@ public class ItemTowerSpawner : MonoBehaviour
         // 아이템 타워 활성화
         itemTowerBlock.ActivateItemTower();
 
+        // ✨ NEW: 시각적 효과 컴포넌트 추가
+        AddVisualEffects(block.gameObject, cellRenderers);
+
         // 생성된 아이템 블록 리스트에 추가
         spawnedItemBlocks.Add(block);
 
         Debug.Log($"✨ Spawned {itemData.itemName} with shape {randomBlockShape.blockName} at {position}");
+    }
+
+    /// <summary>
+    /// 아이템 타워에 시각적 효과 추가 (펄스, 외곽선 등)
+    /// </summary>
+    void AddVisualEffects(GameObject itemTowerObj, SpriteRenderer[] cellRenderers)
+    {
+        // 1. 펄스 효과 컴포넌트 추가
+        ItemTowerPulseEffect pulseEffect = itemTowerObj.AddComponent<ItemTowerPulseEffect>();
+        pulseEffect.Initialize(cellRenderers);
+
+        // 2. 각 셀에 외곽선 효과 추가
+        foreach (SpriteRenderer cellRenderer in cellRenderers)
+        {
+            if (cellRenderer != null)
+            {
+                AddOutlineToCell(cellRenderer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 개별 셀에 외곽선 효과 추가 (그림자 스프라이트 생성)
+    /// </summary>
+    void AddOutlineToCell(SpriteRenderer cellRenderer)
+    {
+        // 외곽선용 GameObject 생성
+        GameObject outlineObj = new GameObject("Outline");
+        outlineObj.transform.SetParent(cellRenderer.transform);
+        outlineObj.transform.localPosition = Vector3.zero;
+        outlineObj.transform.localRotation = Quaternion.identity;
+        outlineObj.transform.localScale = Vector3.one * 1.08f; // 8% 크게
+
+        // SpriteRenderer 복사
+        SpriteRenderer outlineRenderer = outlineObj.AddComponent<SpriteRenderer>();
+        outlineRenderer.sprite = cellRenderer.sprite;
+        outlineRenderer.sortingLayerName = cellRenderer.sortingLayerName;
+        outlineRenderer.sortingOrder = cellRenderer.sortingOrder - 1; // 뒤에 렌더링
+
+        // 외곽선 색상 (밝은 노란색 또는 흰색)
+        outlineRenderer.color = new Color(1f, 1f, 0.5f, 0.4f); // 반투명 노란빛
     }
 
     /// <summary>
