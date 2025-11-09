@@ -261,7 +261,7 @@ Transform:
   m_GameObject: {fileID: 101415673}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 3, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1016,6 +1016,68 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.329185, y: 3.405213, z: -0.057364482}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1009975099
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1009975101}
+  - component: {fileID: 1009975100}
+  m_Layer: 0
+  m_Name: 'KeyBindingManager '
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1009975100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1009975099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c719d4dd58bca634985072eeaf4d5a54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotateBlockKey: 114
+  rotateBlockDescription: "\uBE14\uB85D \uD68C\uC804"
+  spawnTowerKey: 116
+  spawnTowerDescription: "\uD0C0\uC6CC \uC2A4\uD3F0"
+  spawnItemTowerKey: 45
+  spawnItemTowerDescription: "\uC544\uC774\uD15C \uD0C0\uC6CC \uC2A4\uD3F0"
+  clearItemTowerKey: 61
+  clearItemTowerDescription: "\uC544\uC774\uD15C \uD0C0\uC6CC \uC81C\uAC70"
+  showExpandableCellsKey: 101
+  showExpandableCellsDescription: "\uD655\uC7A5 \uAC00\uB2A5 \uC140 \uD1A0\uAE00"
+  showMonsterPathKey: 112
+  showMonsterPathDescription: "\uBAAC\uC2A4\uD130 \uACBD\uB85C \uD1A0\uAE00"
+  toggleMonsterSpawnKey: 109
+  toggleMonsterSpawnDescription: "\uBAAC\uC2A4\uD130 \uC2A4\uD3F0 \uD1A0\uAE00"
+  testPathfindingKey: 102
+  testPathfindingDescription: "\uACBD\uB85C \uCC3E\uAE30 \uD14C\uC2A4\uD2B8"
+  clearAllKey: 99
+  clearAllDescription: "\uBAA8\uB450 \uC81C\uAC70"
+--- !u!4 &1009975101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1009975099}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.6112566, y: 1.5235598, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1806,3 +1868,4 @@ SceneRoots:
   - {fileID: 667350374}
   - {fileID: 652774707}
   - {fileID: 1901330722}
+  - {fileID: 1009975101}
